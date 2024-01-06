@@ -22107,7 +22107,7 @@ try {
   };
   const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const createGitHubDeployment = async (octokit, productionEnvironment, environment) => {
-    console.dir(import_github.context.payload, { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity });
+    const s = import_github.context.payload.pull_request;
     const deployment = await octokit.rest.repos.createDeployment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
@@ -22183,17 +22183,6 @@ try {
     }
     (0, import_core.setOutput)("alias", alias);
     await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
-    if (gitHubDeployment) {
-      const octokit = (0, import_github.getOctokit)(gitHubToken);
-      await createGitHubDeploymentStatus({
-        id: gitHubDeployment.id,
-        url: pagesDeployment.url,
-        deploymentId: pagesDeployment.id,
-        environmentName,
-        productionEnvironment,
-        octokit
-      });
-    }
   })();
 } catch (thrown) {
   (0, import_core.setFailed)(thrown.message);

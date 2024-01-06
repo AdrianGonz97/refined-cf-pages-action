@@ -63,7 +63,7 @@ try {
 	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
 
 	const createGitHubDeployment = async (octokit: Octokit, productionEnvironment: boolean, environment: string) => {
-		console.dir(context.payload, { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity });
+		const s = context.payload.pull_request;
 		const deployment = await octokit.rest.repos.createDeployment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
@@ -99,7 +99,7 @@ try {
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			deployment_id: id,
-			// @ts-ignore
+			// @ts-expect-error
 			environment: environmentName,
 			environment_url: url,
 			production_environment: productionEnvironment,
@@ -162,18 +162,18 @@ try {
 
 		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
-		if (gitHubDeployment) {
-			const octokit = getOctokit(gitHubToken);
+		// if (gitHubDeployment) {
+		// 	const octokit = getOctokit(gitHubToken);
 
-			await createGitHubDeploymentStatus({
-				id: gitHubDeployment.id,
-				url: pagesDeployment.url,
-				deploymentId: pagesDeployment.id,
-				environmentName,
-				productionEnvironment,
-				octokit,
-			});
-		}
+		// 	await createGitHubDeploymentStatus({
+		// 		id: gitHubDeployment.id,
+		// 		url: pagesDeployment.url,
+		// 		deploymentId: pagesDeployment.id,
+		// 		environmentName,
+		// 		productionEnvironment,
+		// 		octokit,
+		// 	});
+		// }
 	})();
 } catch (thrown) {
 	setFailed(thrown.message);
