@@ -22107,11 +22107,11 @@ try {
   };
   const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const createGitHubDeployment = async (octokit, productionEnvironment, environment) => {
-    await import_core.summary.addRaw(`ref: ${import_github.context.ref} - branch: ${githubBranch}`).write();
+    console.log(`ref: ${import_github.context.ref} - branch: ${githubBranch}`);
     const deployment = await octokit.rest.repos.createDeployment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
-      ref: githubBranch || import_github.context.ref,
+      ref: import_github.context.ref,
       auto_merge: false,
       description: "Cloudflare Pages",
       required_contexts: [],
