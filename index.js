@@ -22089,7 +22089,7 @@ try {
     }
     return result;
   };
-  const createPagesDeployment = async (isProd) => {
+  async function createPagesDeployment(isProd) {
     const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
     await src_default.in(import_node_path.default.join(process.cwd(), workingDirectory))`
     $ export CLOUDFLARE_API_TOKEN="${apiToken}"
@@ -22107,8 +22107,8 @@ try {
       result: [deployment]
     } = await response.json();
     return deployment;
-  };
-  const createGitHubDeployment = async (octokit, productionEnvironment, environment) => {
+  }
+  async function createGitHubDeployment(octokit, productionEnvironment, environment) {
     const deployment = await octokit.rest.repos.createDeployment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
@@ -22122,15 +22122,15 @@ try {
     if (deployment.status === 201) {
       return deployment.data;
     }
-  };
-  const createGitHubDeploymentStatus = async ({
+  }
+  async function createGitHubDeploymentStatus({
     id,
     url,
     deploymentId,
     environmentName,
     productionEnvironment,
     octokit
-  }) => {
+  }) {
     await octokit.rest.repos.createDeploymentStatus({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
@@ -22143,8 +22143,8 @@ try {
       state: "success",
       auto_inactive: false
     });
-  };
-  const createJobSummary = async ({ deployment, aliasUrl }) => {
+  }
+  async function createJobSummary({ deployment, aliasUrl }) {
     const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
     let status = "\u26A1\uFE0F  Deployment in progress...";
     if (deployStage?.status === "success") {
@@ -22164,7 +22164,7 @@ try {
 | **Branch Preview URL**: | ${aliasUrl} |
       `
     ).write();
-  };
+  }
   (async () => {
     const project = await getProject();
     const productionEnvironment = githubBranch === project.production_branch || branch === project.production_branch;

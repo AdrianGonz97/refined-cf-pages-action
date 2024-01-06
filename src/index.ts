@@ -41,7 +41,7 @@ try {
 		return result;
 	};
 
-	const createPagesDeployment = async (isProd: boolean) => {
+	async function createPagesDeployment(isProd: boolean) {
 		const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
 		// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 		await shellac.in(path.join(process.cwd(), workingDirectory))`
@@ -62,9 +62,9 @@ try {
 		} = (await response.json()) as { result: Deployment[] };
 
 		return deployment;
-	};
+	}
 
-	const createGitHubDeployment = async (octokit: Octokit, productionEnvironment: boolean, environment: string) => {
+	async function createGitHubDeployment(octokit: Octokit, productionEnvironment: boolean, environment: string) {
 		const deployment = await octokit.rest.repos.createDeployment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
@@ -79,9 +79,9 @@ try {
 		if (deployment.status === 201) {
 			return deployment.data;
 		}
-	};
+	}
 
-	const createGitHubDeploymentStatus = async ({
+	async function createGitHubDeploymentStatus({
 		id,
 		url,
 		deploymentId,
@@ -95,7 +95,7 @@ try {
 		deploymentId: string;
 		environmentName: string;
 		productionEnvironment: boolean;
-	}) => {
+	}) {
 		await octokit.rest.repos.createDeploymentStatus({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
@@ -109,9 +109,9 @@ try {
 			state: "success",
 			auto_inactive: false,
 		});
-	};
+	}
 
-	const createJobSummary = async ({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) => {
+	async function createJobSummary({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) {
 		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
 
 		let status = "⚡️  Deployment in progress...";
@@ -135,7 +135,7 @@ try {
       `
 			)
 			.write();
-	};
+	}
 
 	(async () => {
 		const project = await getProject();
