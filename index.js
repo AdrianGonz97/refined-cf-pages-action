@@ -22070,6 +22070,7 @@ try {
   const branch = (0, import_core.getInput)("branch", { required: false });
   const workingDirectory = (0, import_core.getInput)("workingDirectory", { required: false });
   const wranglerVersion = (0, import_core.getInput)("wranglerVersion", { required: false });
+  const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const getProject = async () => {
     const response = await (0, import_undici.fetch)(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
@@ -22094,7 +22095,7 @@ try {
       $ export CLOUDFLARE_ACCOUNT_ID="${accountId}"
     }
   
-    $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branch}"
+    $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branch || githubBranch}"
     `;
     const response = await (0, import_undici.fetch)(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments`,
@@ -22105,12 +22106,11 @@ try {
     } = await response.json();
     return deployment;
   };
-  const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const createGitHubDeployment = async (octokit, productionEnvironment, environment) => {
     const deployment = await octokit.rest.repos.createDeployment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
-      ref: import_github.context.payload.pull_request?.head.ref,
+      ref: import_github.context.ref,
       auto_merge: false,
       description: "Cloudflare Pages",
       required_contexts: [],
