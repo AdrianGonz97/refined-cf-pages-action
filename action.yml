@@ -22,9 +22,6 @@ inputs:
   branch:
     description: "The name of the branch you want to deploy to"
     required: false
-  ref:
-    description: "Ref"
-    required: true
   workingDirectory:
     description: "The working directory in which to run Wrangler"
     required: false

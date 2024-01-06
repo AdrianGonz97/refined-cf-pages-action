@@ -22067,7 +22067,6 @@ try {
   const projectName = (0, import_core.getInput)("projectName", { required: true });
   const directory = (0, import_core.getInput)("directory", { required: true });
   const gitHubToken = (0, import_core.getInput)("gitHubToken", { required: false });
-  const ref = (0, import_core.getInput)("ref", { required: true });
   const branch = (0, import_core.getInput)("branch", { required: false });
   const workingDirectory = (0, import_core.getInput)("workingDirectory", { required: false });
   const wranglerVersion = (0, import_core.getInput)("wranglerVersion", { required: false });
@@ -22113,7 +22112,7 @@ try {
     const deployment = await octokit.rest.repos.createDeployment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
-      ref: ref || import_github.context.ref,
+      ref: import_github.context.ref,
       auto_merge: false,
       description: "Cloudflare Pages",
       required_contexts: [],

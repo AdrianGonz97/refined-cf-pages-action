@@ -14,7 +14,6 @@ try {
 	const projectName = getInput("projectName", { required: true });
 	const directory = getInput("directory", { required: true });
 	const gitHubToken = getInput("gitHubToken", { required: false });
-	const ref = getInput("ref", { required: true });
 	const branch = getInput("branch", { required: false });
 	const workingDirectory = getInput("workingDirectory", { required: false });
 	const wranglerVersion = getInput("wranglerVersion", { required: false });
@@ -69,7 +68,7 @@ try {
 		const deployment = await octokit.rest.repos.createDeployment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
-			ref: ref || context.ref,
+			ref: context.ref,
 			auto_merge: false,
 			description: "Cloudflare Pages",
 			required_contexts: [],
