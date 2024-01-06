@@ -22130,9 +22130,10 @@ try {
     productionEnvironment,
     octokit
   }) => {
+    console.log({ owner: import_github.context.repo.owner, repo: import_github.context.repo.repo });
     await octokit.rest.repos.createDeploymentStatus({
-      owner: import_github.context.repo.owner,
-      repo: import_github.context.repo.repo,
+      owner: import_github.context.payload.pull_request?.head.repo.owner.login || import_github.context.repo.owner,
+      repo: import_github.context.payload.pull_request?.head.repo.name || import_github.context.repo.repo,
       deployment_id: id,
       environment: environmentName,
       environment_url: url,
@@ -22183,6 +22184,17 @@ try {
     }
     (0, import_core.setOutput)("alias", alias);
     await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+    if (gitHubDeployment) {
+      const octokit = (0, import_github.getOctokit)(gitHubToken);
+      await createGitHubDeploymentStatus({
+        id: gitHubDeployment.id,
+        url: pagesDeployment.url,
+        deploymentId: pagesDeployment.id,
+        environmentName,
+        productionEnvironment,
+        octokit
+      });
+    }
   })();
 } catch (thrown) {
   (0, import_core.setFailed)(thrown.message);

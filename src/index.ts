@@ -95,9 +95,10 @@ try {
 		environmentName: string;
 		productionEnvironment: boolean;
 	}) => {
+		console.log({ owner: context.repo.owner, repo: context.repo.repo });
 		await octokit.rest.repos.createDeploymentStatus({
-			owner: context.repo.owner,
-			repo: context.repo.repo,
+			owner: context.payload.pull_request?.head.repo.owner.login || context.repo.owner,
+			repo: context.payload.pull_request?.head.repo.name || context.repo.repo,
 			deployment_id: id,
 			// @ts-expect-error
 			environment: environmentName,
@@ -162,18 +163,18 @@ try {
 
 		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
-		// if (gitHubDeployment) {
-		// 	const octokit = getOctokit(gitHubToken);
+		if (gitHubDeployment) {
+			const octokit = getOctokit(gitHubToken);
 
-		// 	await createGitHubDeploymentStatus({
-		// 		id: gitHubDeployment.id,
-		// 		url: pagesDeployment.url,
-		// 		deploymentId: pagesDeployment.id,
-		// 		environmentName,
-		// 		productionEnvironment,
-		// 		octokit,
-		// 	});
-		// }
+			await createGitHubDeploymentStatus({
+				id: gitHubDeployment.id,
+				url: pagesDeployment.url,
+				deploymentId: pagesDeployment.id,
+				environmentName,
+				productionEnvironment,
+				octokit,
+			});
+		}
 	})();
 } catch (thrown) {
 	setFailed(thrown.message);
