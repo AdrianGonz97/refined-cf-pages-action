@@ -19,6 +19,7 @@ try {
 	const wranglerVersion = getInput("wranglerVersion", { required: false });
 
 	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
+	const username = context.payload.pull_request?.head.repo.owner.login;
 
 	const getProject = async () => {
 		const response = await fetch(
@@ -40,7 +41,8 @@ try {
 		return result;
 	};
 
-	const createPagesDeployment = async () => {
+	const createPagesDeployment = async (isProd: boolean) => {
+		const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
 		// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 		await shellac.in(path.join(process.cwd(), workingDirectory))`
     $ export CLOUDFLARE_API_TOKEN="${apiToken}"
@@ -48,9 +50,7 @@ try {
       $ export CLOUDFLARE_ACCOUNT_ID="${accountId}"
     }
   
-    $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${
-			branch || githubBranch
-		}"
+    $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branchName}"
     `;
 
 		const response = await fetch(
@@ -150,7 +150,7 @@ try {
 			gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
 		}
 
-		const pagesDeployment = await createPagesDeployment();
+		const pagesDeployment = await createPagesDeployment(productionEnvironment);
 		setOutput("id", pagesDeployment.id);
 		setOutput("url", pagesDeployment.url);
 		setOutput("environment", pagesDeployment.environment);
