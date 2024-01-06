@@ -65,8 +65,10 @@ try {
 	const createGitHubDeployment = async (octokit: Octokit, productionEnvironment: boolean, environment: string) => {
 		const s = context.payload.pull_request;
 		const deployment = await octokit.rest.repos.createDeployment({
-			owner: context.repo.owner,
-			repo: context.repo.repo,
+			// owner: context.repo.owner,
+			// repo: context.repo.repo,
+			owner: context.payload.pull_request?.head.repo.owner.login || context.repo.owner,
+			repo: context.payload.pull_request?.head.repo.name || context.repo.repo,
 			ref: context.ref,
 			auto_merge: false,
 			description: "Cloudflare Pages",
