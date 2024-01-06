@@ -22107,11 +22107,10 @@ try {
   };
   const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const createGitHubDeployment = async (octokit, productionEnvironment, environment) => {
-    const s = import_github.context.payload.pull_request;
     const deployment = await octokit.rest.repos.createDeployment({
-      owner: import_github.context.payload.pull_request?.head.repo.owner.login || import_github.context.repo.owner,
-      repo: import_github.context.payload.pull_request?.head.repo.name || import_github.context.repo.repo,
-      ref: import_github.context.payload.pull_request?.head.ref || import_github.context.ref,
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
+      ref: import_github.context.ref,
       auto_merge: false,
       description: "Cloudflare Pages",
       required_contexts: [],
@@ -22130,10 +22129,9 @@ try {
     productionEnvironment,
     octokit
   }) => {
-    console.log({ owner: import_github.context.repo.owner, repo: import_github.context.repo.repo });
     await octokit.rest.repos.createDeploymentStatus({
-      owner: import_github.context.payload.pull_request?.head.repo.owner.login || import_github.context.repo.owner,
-      repo: import_github.context.payload.pull_request?.head.repo.name || import_github.context.repo.repo,
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
       deployment_id: id,
       environment: environmentName,
       environment_url: url,

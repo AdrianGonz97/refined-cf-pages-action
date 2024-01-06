@@ -63,13 +63,10 @@ try {
 	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
 
 	const createGitHubDeployment = async (octokit: Octokit, productionEnvironment: boolean, environment: string) => {
-		const s = context.payload.pull_request;
 		const deployment = await octokit.rest.repos.createDeployment({
-			// owner: context.repo.owner,
-			// repo: context.repo.repo,
-			owner: context.payload.pull_request?.head.repo.owner.login || context.repo.owner,
-			repo: context.payload.pull_request?.head.repo.name || context.repo.repo,
-			ref: context.payload.pull_request?.head.ref || context.ref,
+			owner: context.repo.owner,
+			repo: context.repo.repo,
+			ref: context.ref,
 			auto_merge: false,
 			description: "Cloudflare Pages",
 			required_contexts: [],
@@ -97,10 +94,9 @@ try {
 		environmentName: string;
 		productionEnvironment: boolean;
 	}) => {
-		console.log({ owner: context.repo.owner, repo: context.repo.repo });
 		await octokit.rest.repos.createDeploymentStatus({
-			owner: context.payload.pull_request?.head.repo.owner.login || context.repo.owner,
-			repo: context.payload.pull_request?.head.repo.name || context.repo.repo,
+			owner: context.repo.owner,
+			repo: context.repo.repo,
 			deployment_id: id,
 			// @ts-expect-error
 			environment: environmentName,
