@@ -22149,7 +22149,6 @@ try {
     });
   }
   async function createJobSummary({ deployment, aliasUrl }) {
-    console.dir({ deployment }, { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity });
     const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
     let deploymentStatus = "\u26A1\uFE0F  Deployment in progress...";
     if (deployStage?.status === "success") {
