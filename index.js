@@ -22215,11 +22215,11 @@ try {
   async function createJobSummary(opts) {
     const { aliasUrl, deployment } = opts;
     const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
-    let deploymentStatus = "\u26A1\uFE0F  Deployment in progress...";
+    let deploymentStatus = "\u26A1\uFE0F Deployment in progress...";
     if (deployStage?.status === "success") {
-      deploymentStatus = "\u2705  Deploy successful!";
+      deploymentStatus = "\u2705 Deployment successful!";
     } else if (deployStage?.status === "failure") {
-      deploymentStatus = "\u{1F6AB}  Deployment failed";
+      deploymentStatus = "\u{1F6AB} Deployment failed";
     }
     await import_core.summary.addRaw(
       `

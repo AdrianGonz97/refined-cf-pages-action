@@ -164,11 +164,11 @@ try {
 		const { aliasUrl, deployment } = opts;
 		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
 
-		let deploymentStatus = "⚡️  Deployment in progress...";
+		let deploymentStatus = "⚡️ Deployment in progress...";
 		if (deployStage?.status === "success") {
-			deploymentStatus = "✅  Deploy successful!";
+			deploymentStatus = "✅ Deployment successful!";
 		} else if (deployStage?.status === "failure") {
-			deploymentStatus = "🚫  Deployment failed";
+			deploymentStatus = "🚫 Deployment failed";
 		}
 
 		await summary
