@@ -22180,6 +22180,7 @@ try {
     (0, import_core.setOutput)("url", pagesDeployment.url);
     (0, import_core.setOutput)("environment", pagesDeployment.environment);
     let alias = pagesDeployment.url;
+    console.log({ aliases: pagesDeployment.aliases });
     if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
       alias = pagesDeployment.aliases[0];
     }
