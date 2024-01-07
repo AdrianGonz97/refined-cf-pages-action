@@ -50,15 +50,13 @@ try {
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			issue_number: context.issue.number,
-			body: `### ⚡ Successfully Cloudflare Pages deployed!
-            | Name | Link |
-            | :--- | :--- |
-            | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
-            | Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${
-				context.runId
-			} |
-            | Preview URL | ${previewUrl} |
-            | Environment | ${environment} |`,
+			body: `### ⚡ Cloudflare Pages
+| Name | Link |
+| :--- | :--- |
+| Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
+| Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId} |
+| Preview URL | ${previewUrl} |
+| Environment | ${environment} |`,
 		});
 	}
 

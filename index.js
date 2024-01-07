@@ -22098,13 +22098,13 @@ try {
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       issue_number: import_github.context.issue.number,
-      body: `### \u26A1 Successfully Cloudflare Pages deployed!
-            | Name | Link |
-            | :--- | :--- |
-            | Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
-            | Latest deploy log | ${import_github.context.serverUrl}/${import_github.context.repo.owner}/${import_github.context.repo.repo}/actions/runs/${import_github.context.runId} |
-            | Preview URL | ${previewUrl} |
-            | Environment | ${environment} |`
+      body: `### \u26A1 Cloudflare Pages
+| Name | Link |
+| :--- | :--- |
+| Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
+| Latest deploy log | ${import_github.context.serverUrl}/${import_github.context.repo.owner}/${import_github.context.repo.repo}/actions/runs/${import_github.context.runId} |
+| Preview URL | ${previewUrl} |
+| Environment | ${environment} |`
     });
   }
   async function createPagesDeployment(isProd) {
