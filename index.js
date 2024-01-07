@@ -22199,6 +22199,7 @@ try {
         productionEnvironment,
         octokit
       });
+      await new Promise((resolve) => setTimeout(resolve, 1e4));
       const deployment = await getPagesDeployment();
       await createJobSummary({ deployment, aliasUrl: alias });
     }

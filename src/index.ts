@@ -181,6 +181,7 @@ try {
 				octokit,
 			});
 
+			await new Promise((resolve) => setTimeout(resolve, 10000));
 			const deployment = await getPagesDeployment();
 			await createJobSummary({ deployment, aliasUrl: alias });
 		}
