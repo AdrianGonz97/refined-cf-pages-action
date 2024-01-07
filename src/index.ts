@@ -47,7 +47,9 @@ try {
 	async function createPRComment(octokit: Octokit, previewUrl: string, environment: string) {
 		if (!isPR) return;
 
-		const body = `<!-- deployment-comment:${projectName} -->
+		const messageId = `deployment-comment:${projectName}`;
+
+		const body = `<!-- ${messageId} -->
 
 ### ⚡ Cloudflare Pages Deployment
 | Name | Link |
@@ -63,7 +65,7 @@ try {
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			issueNumber: context.issue.number,
-			projectName,
+			messageId,
 		});
 
 		if (existingComment !== undefined) {

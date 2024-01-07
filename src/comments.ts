@@ -7,9 +7,8 @@ export async function findExistingComment(opts: {
 	owner: string;
 	repo: string;
 	issueNumber: number;
-	projectName: string;
+	messageId: string;
 }) {
-	const messageId = `deployment-comment:${opts.projectName}`;
 	const params = {
 		owner: opts.owner,
 		repo: opts.repo,
@@ -21,7 +20,7 @@ export async function findExistingComment(opts: {
 
 	for await (const comments of opts.octokit.paginate.iterator(opts.octokit.rest.issues.listComments, params)) {
 		found = comments.data.find(({ body }) => {
-			return (body?.search(messageId) ?? -1) > -1;
+			return (body?.search(opts.messageId) ?? -1) > -1;
 		});
 
 		if (found) {

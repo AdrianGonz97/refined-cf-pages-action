@@ -22064,7 +22064,6 @@ var import_node_path = __toESM(require("path"));
 
 // src/comments.ts
 async function findExistingComment(opts) {
-  const messageId = `deployment-comment:${opts.projectName}`;
   const params = {
     owner: opts.owner,
     repo: opts.repo,
@@ -22074,7 +22073,7 @@ async function findExistingComment(opts) {
   let found;
   for await (const comments of opts.octokit.paginate.iterator(opts.octokit.rest.issues.listComments, params)) {
     found = comments.data.find(({ body }) => {
-      return (body?.search(messageId) ?? -1) > -1;
+      return (body?.search(opts.messageId) ?? -1) > -1;
     });
     if (found) {
       break;
@@ -22121,7 +22120,8 @@ try {
   async function createPRComment(octokit, previewUrl, environment) {
     if (!isPR)
       return;
-    const body = `<!-- deployment-comment:${projectName} -->
+    const messageId = `deployment-comment:${projectName}`;
+    const body = `<!-- ${messageId} -->
 
 ### \u26A1 Cloudflare Pages Deployment
 | Name | Link |
@@ -22136,7 +22136,7 @@ try {
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       issueNumber: import_github.context.issue.number,
-      projectName
+      messageId
     });
     if (existingComment !== void 0) {
       return await octokit.rest.issues.updateComment({
