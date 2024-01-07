@@ -54,6 +54,10 @@ try {
     $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branchName}"
     `;
 
+		return getPagesDeployment();
+	}
+
+	async function getPagesDeployment() {
 		const response = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments`,
 			{ headers: { Authorization: `Bearer ${apiToken}` } }
@@ -112,19 +116,13 @@ try {
 		});
 	}
 
-	async function createJobSummary({
-		deployment,
-		aliasUrl,
-		status,
-	}: {
-		deployment: Deployment;
-		aliasUrl: string;
-		status?: string;
-	}) {
+	async function createJobSummary({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) {
+		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
+
 		let deploymentStatus = "⚡️  Deployment in progress...";
-		if (status === "success") {
+		if (deployStage?.status === "success") {
 			deploymentStatus = "✅  Deploy successful!";
-		} else if (status === "failure") {
+		} else if (deployStage?.status === "failure") {
 			deploymentStatus = "🚫  Deployment failed";
 		}
 
@@ -168,13 +166,12 @@ try {
 		}
 		setOutput("alias", alias);
 
-		const deployStage = pagesDeployment.stages.find((stage) => stage.name === "deploy");
-		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias, status: deployStage?.status });
+		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
 		if (gitHubDeployment) {
 			const octokit = getOctokit(gitHubToken);
 
-			const deploymentStatus = await createGitHubDeploymentStatus({
+			await createGitHubDeploymentStatus({
 				id: gitHubDeployment.id,
 				url: pagesDeployment.url,
 				deploymentId: pagesDeployment.id,
@@ -183,7 +180,8 @@ try {
 				octokit,
 			});
 
-			await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias, status: deploymentStatus.data.state });
+			const deployment = await getPagesDeployment();
+			await createJobSummary({ deployment, aliasUrl: alias });
 		}
 	})();
 } catch (thrown) {

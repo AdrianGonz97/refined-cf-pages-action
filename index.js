@@ -22100,6 +22100,9 @@ try {
   
     $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branchName}"
     `;
+    return getPagesDeployment();
+  }
+  async function getPagesDeployment() {
     const response = await (0, import_undici.fetch)(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments`,
       { headers: { Authorization: `Bearer ${apiToken}` } }
@@ -22145,15 +22148,12 @@ try {
       auto_inactive: false
     });
   }
-  async function createJobSummary({
-    deployment,
-    aliasUrl,
-    status
-  }) {
+  async function createJobSummary({ deployment, aliasUrl }) {
+    const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
     let deploymentStatus = "\u26A1\uFE0F  Deployment in progress...";
-    if (status === "success") {
+    if (deployStage?.status === "success") {
       deploymentStatus = "\u2705  Deploy successful!";
-    } else if (status === "failure") {
+    } else if (deployStage?.status === "failure") {
       deploymentStatus = "\u{1F6AB}  Deployment failed";
     }
     await import_core.summary.addRaw(
@@ -22187,11 +22187,10 @@ try {
       alias = pagesDeployment.aliases[0];
     }
     (0, import_core.setOutput)("alias", alias);
-    const deployStage = pagesDeployment.stages.find((stage) => stage.name === "deploy");
-    await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias, status: deployStage?.status });
+    await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
     if (gitHubDeployment) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
-      const deploymentStatus = await createGitHubDeploymentStatus({
+      await createGitHubDeploymentStatus({
         id: gitHubDeployment.id,
         url: pagesDeployment.url,
         deploymentId: pagesDeployment.id,
@@ -22199,7 +22198,8 @@ try {
         productionEnvironment,
         octokit
       });
-      await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias, status: deploymentStatus.data.state });
+      const deployment = await getPagesDeployment();
+      await createJobSummary({ deployment, aliasUrl: alias });
     }
   })();
 } catch (thrown) {
