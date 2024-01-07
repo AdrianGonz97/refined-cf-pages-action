@@ -22132,7 +22132,7 @@ try {
     productionEnvironment,
     octokit
   }) {
-    await octokit.rest.repos.createDeploymentStatus({
+    return octokit.rest.repos.createDeploymentStatus({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       deployment_id: id,
@@ -22145,13 +22145,16 @@ try {
       auto_inactive: false
     });
   }
-  async function createJobSummary({ deployment, aliasUrl }) {
-    const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
-    let status = "\u26A1\uFE0F  Deployment in progress...";
-    if (deployStage?.status === "success") {
-      status = "\u2705  Deploy successful!";
-    } else if (deployStage?.status === "failure") {
-      status = "\u{1F6AB}  Deployment failed";
+  async function createJobSummary({
+    deployment,
+    aliasUrl,
+    status
+  }) {
+    let deploymentStatus = "\u26A1\uFE0F  Deployment in progress...";
+    if (status === "success") {
+      deploymentStatus = "\u2705  Deploy successful!";
+    } else if (status === "failure") {
+      deploymentStatus = "\u{1F6AB}  Deployment failed";
     }
     await import_core.summary.addRaw(
       `
@@ -22160,11 +22163,11 @@ try {
 | Name                    | Result |
 | ----------------------- | - |
 | **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(0, 8)}\` |
-| **Status**:             | ${status} |
+| **Status**:             | ${deploymentStatus} |
 | **Preview URL**:        | ${deployment.url} |
 | **Branch Preview URL**: | ${aliasUrl} |
       `
-    ).write();
+    ).write({ overwrite: true });
   }
   (async () => {
     const project = await getProject();
@@ -22184,10 +22187,11 @@ try {
       alias = pagesDeployment.aliases[0];
     }
     (0, import_core.setOutput)("alias", alias);
-    await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+    const deployStage = pagesDeployment.stages.find((stage) => stage.name === "deploy");
+    await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias, status: deployStage?.status });
     if (gitHubDeployment) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
-      await createGitHubDeploymentStatus({
+      const deploymentStatus = await createGitHubDeploymentStatus({
         id: gitHubDeployment.id,
         url: pagesDeployment.url,
         deploymentId: pagesDeployment.id,
@@ -22195,8 +22199,8 @@ try {
         productionEnvironment,
         octokit
       });
+      await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias, status: deploymentStatus.data.state });
     }
-    await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
   })();
 } catch (thrown) {
   (0, import_core.setFailed)(thrown.message);
