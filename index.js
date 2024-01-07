@@ -22061,6 +22061,33 @@ var src_default = shellac;
 var import_undici = __toESM(require_undici());
 var import_process = require("process");
 var import_node_path = __toESM(require("path"));
+
+// src/comments.ts
+async function findExistingComment(opts) {
+  const messageId = `deployment-comment:${opts.projectName}`;
+  const params = {
+    owner: opts.owner,
+    repo: opts.repo,
+    issue_number: opts.issueNumber,
+    per_page: 100
+  };
+  let found;
+  for await (const comments of opts.octokit.paginate.iterator(opts.octokit.rest.issues.listComments, params)) {
+    found = comments.data.find(({ body }) => {
+      return (body?.search(messageId) ?? -1) > -1;
+    });
+    if (found) {
+      break;
+    }
+  }
+  if (found) {
+    const { id, body } = found;
+    return { id, body };
+  }
+  return;
+}
+
+// src/index.ts
 try {
   const apiToken = (0, import_core.getInput)("apiToken", { required: true });
   const accountId = (0, import_core.getInput)("accountId", { required: true });
@@ -22094,17 +22121,37 @@ try {
   async function createPRComment(octokit, previewUrl, environment) {
     if (!isPR)
       return;
-    await octokit.rest.issues.createComment({
-      owner: import_github.context.repo.owner,
-      repo: import_github.context.repo.repo,
-      issue_number: import_github.context.issue.number,
-      body: `### \u26A1 Deploying to Cloudflare Pages
+    const body = `<!-- deployment-comment:${projectName} -->
+
+### \u26A1 Deploying to Cloudflare Pages
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
 | Latest deploy log | ${import_github.context.serverUrl}/${import_github.context.repo.owner}/${import_github.context.repo.repo}/actions/runs/${import_github.context.runId} |
 | Preview URL | ${previewUrl} |
-| Environment | ${environment} |`
+| Environment | ${environment} |
+`;
+    const existingComment = await findExistingComment({
+      octokit,
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
+      issueNumber: import_github.context.issue.number,
+      projectName
+    });
+    if (existingComment !== void 0) {
+      return await octokit.rest.issues.updateComment({
+        owner: import_github.context.repo.owner,
+        repo: import_github.context.repo.repo,
+        issue_number: import_github.context.issue.number,
+        comment_id: existingComment.id,
+        body
+      });
+    }
+    return await octokit.rest.issues.createComment({
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
+      issue_number: import_github.context.issue.number,
+      body
     });
   }
   async function createPagesDeployment(isProd) {

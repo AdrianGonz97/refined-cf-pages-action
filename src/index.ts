@@ -5,6 +5,7 @@ import shellac from "shellac";
 import { fetch } from "undici";
 import { env } from "process";
 import path from "node:path";
+import { findExistingComment } from "./comments.js";
 
 type Octokit = ReturnType<typeof getOctokit>;
 
@@ -46,17 +47,40 @@ try {
 	async function createPRComment(octokit: Octokit, previewUrl: string, environment: string) {
 		if (!isPR) return;
 
-		await octokit.rest.issues.createComment({
-			owner: context.repo.owner,
-			repo: context.repo.repo,
-			issue_number: context.issue.number,
-			body: `### ⚡ Deploying to Cloudflare Pages
+		const body = `<!-- deployment-comment:${projectName} -->
+
+### ⚡ Deploying to Cloudflare Pages
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
 | Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId} |
 | Preview URL | ${previewUrl} |
-| Environment | ${environment} |`,
+| Environment | ${environment} |
+`;
+
+		const existingComment = await findExistingComment({
+			octokit,
+			owner: context.repo.owner,
+			repo: context.repo.repo,
+			issueNumber: context.issue.number,
+			projectName,
+		});
+
+		if (existingComment !== undefined) {
+			return await octokit.rest.issues.updateComment({
+				owner: context.repo.owner,
+				repo: context.repo.repo,
+				issue_number: context.issue.number,
+				comment_id: existingComment.id,
+				body,
+			});
+		}
+
+		return await octokit.rest.issues.createComment({
+			owner: context.repo.owner,
+			repo: context.repo.repo,
+			issue_number: context.issue.number,
+			body,
 		});
 	}
 
