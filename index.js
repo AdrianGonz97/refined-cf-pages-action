@@ -22117,13 +22117,13 @@ try {
     }
     return result;
   }
-  async function createPRComment(octokit, previewUrl, environment) {
+  async function createPRComment(octokit, title, previewUrl, environment) {
     if (!isPR)
       return;
     const messageId = `deployment-comment:${projectName}`;
     const body = `<!-- ${messageId} -->
 
-### \u26A1 Cloudflare Pages Deployment
+### ${title}
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
@@ -22241,7 +22241,7 @@ try {
     let gitHubDeployment;
     if (gitHubToken && gitHubToken.length) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
-      await createPRComment(octokit, "\u{1F528} Building Preview", "...");
+      await createPRComment(octokit, "\u26A1\uFE0F Cloudflare Pages deployment in progress", "\u{1F528} Building Preview", "...");
       gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
     }
     const pagesDeployment = await createPagesDeployment(productionEnvironment);
@@ -22264,7 +22264,12 @@ try {
         productionEnvironment,
         octokit
       });
-      await createPRComment(octokit, pagesDeployment.url, pagesDeployment.environment);
+      await createPRComment(
+        octokit,
+        "\u2705 Successful Cloudflare Pages deployment",
+        pagesDeployment.url,
+        pagesDeployment.environment
+      );
       await new Promise((resolve) => setTimeout(resolve, 5e3));
       const deployment = await getPagesDeployment();
       await createJobSummary({ deployment, aliasUrl: alias });

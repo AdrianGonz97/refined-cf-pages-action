@@ -44,14 +44,14 @@ try {
 		return result;
 	}
 
-	async function createPRComment(octokit: Octokit, previewUrl: string, environment: string) {
+	async function createPRComment(octokit: Octokit, title: string, previewUrl: string, environment: string) {
 		if (!isPR) return;
 
 		const messageId = `deployment-comment:${projectName}`;
 
 		const body = `<!-- ${messageId} -->
 
-### ⚡ Cloudflare Pages Deployment
+### ${title}
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
@@ -197,7 +197,7 @@ try {
 
 		if (gitHubToken && gitHubToken.length) {
 			const octokit = getOctokit(gitHubToken);
-			await createPRComment(octokit, "🔨 Building Preview", "...");
+			await createPRComment(octokit, "⚡️ Cloudflare Pages deployment in progress", "🔨 Building Preview", "...");
 			gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
 		}
 
@@ -226,7 +226,12 @@ try {
 				octokit,
 			});
 
-			await createPRComment(octokit, pagesDeployment.url, pagesDeployment.environment);
+			await createPRComment(
+				octokit,
+				"✅ Successful Cloudflare Pages deployment",
+				pagesDeployment.url,
+				pagesDeployment.environment
+			);
 
 			// we sleep to give CF enough time to update their deployment status
 			await new Promise((resolve) => setTimeout(resolve, 5000));
