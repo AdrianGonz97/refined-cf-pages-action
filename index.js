@@ -22241,7 +22241,7 @@ try {
     let gitHubDeployment;
     if (gitHubToken && gitHubToken.length) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
-      await createPRComment(octokit, "\u26A1\uFE0F Cloudflare Pages deployment in progress", "\u{1F528} Building Preview", "...");
+      await createPRComment(octokit, "\u26A1\uFE0F Preparing Cloudflare Pages deployment", "\u{1F528} Building Preview", "...");
       gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
     }
     const pagesDeployment = await createPagesDeployment(productionEnvironment);
