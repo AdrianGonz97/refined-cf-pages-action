@@ -69,7 +69,7 @@ try {
 		const deployment = await octokit.rest.repos.createDeployment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
-			ref: context.payload.pull_request?.head.sha,
+			ref: context.payload.pull_request?.head.sha || context.ref,
 			auto_merge: false,
 			description: "Cloudflare Pages",
 			required_contexts: [],
