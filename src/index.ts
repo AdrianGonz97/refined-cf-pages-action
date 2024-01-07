@@ -18,6 +18,9 @@ try {
 	const workingDirectory = getInput("workingDirectory", { required: false });
 	const wranglerVersion = getInput("wranglerVersion", { required: false });
 
+	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
+	const username = context.payload.pull_request?.head.repo.owner.login;
+
 	const getProject = async () => {
 		const response = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
@@ -38,7 +41,8 @@ try {
 		return result;
 	};
 
-	const createPagesDeployment = async () => {
+	async function createPagesDeployment(isProd: boolean) {
+		const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
 		// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 		await shellac.in(path.join(process.cwd(), workingDirectory))`
     $ export CLOUDFLARE_API_TOKEN="${apiToken}"
@@ -46,7 +50,7 @@ try {
       $ export CLOUDFLARE_ACCOUNT_ID="${accountId}"
     }
   
-    $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branch}"
+    $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branchName}"
     `;
 
 		const response = await fetch(
@@ -58,11 +62,9 @@ try {
 		} = (await response.json()) as { result: Deployment[] };
 
 		return deployment;
-	};
+	}
 
-	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
-
-	const createGitHubDeployment = async (octokit: Octokit, productionEnvironment: boolean, environment: string) => {
+	async function createGitHubDeployment(octokit: Octokit, productionEnvironment: boolean, environment: string) {
 		const deployment = await octokit.rest.repos.createDeployment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
@@ -77,9 +79,9 @@ try {
 		if (deployment.status === 201) {
 			return deployment.data;
 		}
-	};
+	}
 
-	const createGitHubDeploymentStatus = async ({
+	async function createGitHubDeploymentStatus({
 		id,
 		url,
 		deploymentId,
@@ -93,12 +95,12 @@ try {
 		deploymentId: string;
 		environmentName: string;
 		productionEnvironment: boolean;
-	}) => {
+	}) {
 		await octokit.rest.repos.createDeploymentStatus({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			deployment_id: id,
-			// @ts-ignore
+			// @ts-expect-error
 			environment: environmentName,
 			environment_url: url,
 			production_environment: productionEnvironment,
@@ -107,9 +109,9 @@ try {
 			state: "success",
 			auto_inactive: false,
 		});
-	};
+	}
 
-	const createJobSummary = async ({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) => {
+	async function createJobSummary({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) {
 		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
 
 		let status = "⚡️  Deployment in progress...";
@@ -133,7 +135,7 @@ try {
       `
 			)
 			.write();
-	};
+	}
 
 	(async () => {
 		const project = await getProject();
@@ -148,7 +150,7 @@ try {
 			gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
 		}
 
-		const pagesDeployment = await createPagesDeployment();
+		const pagesDeployment = await createPagesDeployment(productionEnvironment);
 		setOutput("id", pagesDeployment.id);
 		setOutput("url", pagesDeployment.url);
 		setOutput("environment", pagesDeployment.environment);
