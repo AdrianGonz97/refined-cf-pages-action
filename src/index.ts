@@ -15,6 +15,7 @@ try {
 	const directory = getInput("directory", { required: true });
 	const gitHubToken = getInput("gitHubToken", { required: false });
 	const branch = getInput("branch", { required: false });
+	const deploymentName = getInput("deploymentName", { required: false });
 	const workingDirectory = getInput("workingDirectory", { required: false });
 	const wranglerVersion = getInput("wranglerVersion", { required: false });
 
@@ -141,7 +142,7 @@ try {
 		const project = await getProject();
 
 		const productionEnvironment = githubBranch === project.production_branch || branch === project.production_branch;
-		const environmentName = `${productionEnvironment ? "Production" : "Preview"}`;
+		const environmentName = deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
 
 		let gitHubDeployment: Awaited<ReturnType<typeof createGitHubDeployment>>;
 
