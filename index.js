@@ -22123,7 +22123,7 @@ try {
       return;
     const body = `<!-- deployment-comment:${projectName} -->
 
-### \u26A1 Deploying to Cloudflare Pages
+### \u26A1 Cloudflare Pages Deployment
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |

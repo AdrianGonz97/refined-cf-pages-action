@@ -49,7 +49,7 @@ try {
 
 		const body = `<!-- deployment-comment:${projectName} -->
 
-### ⚡ Deploying to Cloudflare Pages
+### ⚡ Cloudflare Pages Deployment
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
