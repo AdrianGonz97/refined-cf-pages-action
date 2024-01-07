@@ -176,6 +176,8 @@ try {
 				octokit,
 			});
 		}
+
+		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 	})();
 } catch (thrown) {
 	setFailed(thrown.message);

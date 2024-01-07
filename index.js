@@ -22196,6 +22196,7 @@ try {
         octokit
       });
     }
+    await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
   })();
 } catch (thrown) {
   (0, import_core.setFailed)(thrown.message);
