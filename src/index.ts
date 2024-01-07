@@ -116,7 +116,8 @@ try {
 		});
 	}
 
-	async function createJobSummary({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) {
+	async function createJobSummary(opts: { deployment: Deployment; aliasUrl: string }) {
+		const { aliasUrl, deployment } = opts;
 		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
 
 		let deploymentStatus = "⚡️  Deployment in progress...";
@@ -180,7 +181,7 @@ try {
 				octokit,
 			});
 
-			await new Promise((resolve) => setTimeout(resolve, 10000));
+			await new Promise((resolve) => setTimeout(resolve, 5000));
 			const deployment = await getPagesDeployment();
 			await createJobSummary({ deployment, aliasUrl: alias });
 		}
