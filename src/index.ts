@@ -117,6 +117,7 @@ try {
 	}
 
 	async function createJobSummary({ deployment, aliasUrl }: { deployment: Deployment; aliasUrl: string }) {
+		console.dir({ deployment: deployment }, { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity });
 		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
 
 		let deploymentStatus = "⚡️  Deployment in progress...";
