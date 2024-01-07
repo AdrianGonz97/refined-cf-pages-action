@@ -181,6 +181,7 @@ try {
 				octokit,
 			});
 
+			// we sleep to give CF enough time to update their deployment status
 			await new Promise((resolve) => setTimeout(resolve, 5000));
 			const deployment = await getPagesDeployment();
 			await createJobSummary({ deployment, aliasUrl: alias });
