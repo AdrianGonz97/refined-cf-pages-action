@@ -21,8 +21,9 @@ try {
 
 	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
 	const username = context.payload.pull_request?.head.repo.owner.login;
+	const isPR = context.eventName === "pull_request" || context.eventName === "pull_request_target";
 
-	const getProject = async () => {
+	async function getProject() {
 		const response = await fetch(
 			`https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
 			{ headers: { Authorization: `Bearer ${apiToken}` } }
@@ -40,7 +41,26 @@ try {
 		}
 
 		return result;
-	};
+	}
+
+	async function createPRComment(octokit: Octokit, previewUrl: string, environment: string) {
+		if (!isPR) return;
+
+		await octokit.rest.issues.createComment({
+			owner: context.repo.owner,
+			repo: context.repo.repo,
+			issue_number: context.issue.number,
+			body: `### ⚡ Successfully Cloudflare Pages deployed!
+            | Name | Link |
+            | :--- | :--- |
+            | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
+            | Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${
+				context.runId
+			} |
+            | Preview URL | ${previewUrl} |
+            | Environment | ${environment} |`,
+		});
+	}
 
 	async function createPagesDeployment(isProd: boolean) {
 		const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
@@ -153,6 +173,7 @@ try {
 
 		if (gitHubToken && gitHubToken.length) {
 			const octokit = getOctokit(gitHubToken);
+			await createPRComment(octokit, "🔨 Building...", "🔨 Building...");
 			gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
 		}
 
@@ -180,6 +201,8 @@ try {
 				productionEnvironment,
 				octokit,
 			});
+
+			await createPRComment(octokit, pagesDeployment.url, pagesDeployment.environment);
 
 			// we sleep to give CF enough time to update their deployment status
 			await new Promise((resolve) => setTimeout(resolve, 5000));

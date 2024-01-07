@@ -22073,7 +22073,8 @@ try {
   const wranglerVersion = (0, import_core.getInput)("wranglerVersion", { required: false });
   const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const username = import_github.context.payload.pull_request?.head.repo.owner.login;
-  const getProject = async () => {
+  const isPR = import_github.context.eventName === "pull_request" || import_github.context.eventName === "pull_request_target";
+  async function getProject() {
     const response = await (0, import_undici.fetch)(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
       { headers: { Authorization: `Bearer ${apiToken}` } }
@@ -22089,7 +22090,23 @@ try {
       throw new Error("Failed to get Pages project, project does not exist. Check the project name or create it!");
     }
     return result;
-  };
+  }
+  async function createPRComment(octokit, previewUrl, environment) {
+    if (!isPR)
+      return;
+    await octokit.rest.issues.createComment({
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
+      issue_number: import_github.context.issue.number,
+      body: `### \u26A1 Successfully Cloudflare Pages deployed!
+            | Name | Link |
+            | :--- | :--- |
+            | Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
+            | Latest deploy log | ${import_github.context.serverUrl}/${import_github.context.repo.owner}/${import_github.context.repo.repo}/actions/runs/${import_github.context.runId} |
+            | Preview URL | ${previewUrl} |
+            | Environment | ${environment} |`
+    });
+  }
   async function createPagesDeployment(isProd) {
     const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
     await src_default.in(import_node_path.default.join(process.cwd(), workingDirectory))`
@@ -22177,6 +22194,7 @@ try {
     let gitHubDeployment;
     if (gitHubToken && gitHubToken.length) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
+      await createPRComment(octokit, "\u{1F528} Building...", "\u{1F528} Building...");
       gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
     }
     const pagesDeployment = await createPagesDeployment(productionEnvironment);
@@ -22199,6 +22217,7 @@ try {
         productionEnvironment,
         octokit
       });
+      await createPRComment(octokit, pagesDeployment.url, pagesDeployment.environment);
       await new Promise((resolve) => setTimeout(resolve, 5e3));
       const deployment = await getPagesDeployment();
       await createJobSummary({ deployment, aliasUrl: alias });
