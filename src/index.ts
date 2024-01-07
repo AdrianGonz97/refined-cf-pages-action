@@ -50,7 +50,7 @@ try {
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			issue_number: context.issue.number,
-			body: `### ⚡ Cloudflare Pages
+			body: `### ⚡ Deploying to Cloudflare Pages
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
@@ -171,7 +171,7 @@ try {
 
 		if (gitHubToken && gitHubToken.length) {
 			const octokit = getOctokit(gitHubToken);
-			await createPRComment(octokit, "🔨 Building...", "🔨 Building...");
+			await createPRComment(octokit, "🔨 Building Preview", "...");
 			gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
 		}
 

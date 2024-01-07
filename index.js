@@ -22098,7 +22098,7 @@ try {
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       issue_number: import_github.context.issue.number,
-      body: `### \u26A1 Cloudflare Pages
+      body: `### \u26A1 Deploying to Cloudflare Pages
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
@@ -22194,7 +22194,7 @@ try {
     let gitHubDeployment;
     if (gitHubToken && gitHubToken.length) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
-      await createPRComment(octokit, "\u{1F528} Building...", "\u{1F528} Building...");
+      await createPRComment(octokit, "\u{1F528} Building Preview", "...");
       gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
     }
     const pagesDeployment = await createPagesDeployment(productionEnvironment);
