@@ -1,3 +1,4 @@
+"use strict";
 var __create = Object.create;
 var __defProp = Object.defineProperty;
 var __getOwnPropDesc = Object.getOwnPropertyDescriptor;
@@ -21050,11 +21051,11 @@ var require_undici = __commonJS({
 });
 
 // src/index.ts
-var import_core3 = __toESM(require_core());
-var import_github4 = __toESM(require_github());
+var import_core3 = __toESM(require_core(), 1);
+var import_github4 = __toESM(require_github(), 1);
 
 // src/config.ts
-var import_core = __toESM(require_core());
+var import_core = __toESM(require_core(), 1);
 function loadConfig() {
   try {
     return {
@@ -21076,10 +21077,10 @@ function loadConfig() {
 var config = loadConfig();
 
 // src/comments.ts
-var import_github2 = __toESM(require_github());
+var import_github2 = __toESM(require_github(), 1);
 
 // src/globals.ts
-var import_github = __toESM(require_github());
+var import_github = __toESM(require_github(), 1);
 var import_process = require("process");
 var githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
 var prBranchOwner = import_github.context.payload.pull_request?.head.repo.owner.login;
@@ -21148,8 +21149,8 @@ async function createPRComment(opts) {
 }
 
 // src/deployments.ts
-var import_github3 = __toESM(require_github());
-var import_core2 = __toESM(require_core());
+var import_github3 = __toESM(require_github(), 1);
+var import_core2 = __toESM(require_core(), 1);
 async function createGitHubDeployment({
   octokit,
   productionEnvironment,
@@ -22213,8 +22214,8 @@ var shellac = Object.assign(_shellac(process.cwd(), lazyCreateShell), {
 var src_default = shellac;
 
 // src/cloudflare.ts
-var import_node_path = __toESM(require("path"));
-var import_undici = __toESM(require_undici());
+var import_node_path = __toESM(require("path"), 1);
+var import_undici = __toESM(require_undici(), 1);
 async function getPagesProject() {
   const response = await (0, import_undici.fetch)(
     `https://api.cloudflare.com/client/v4/accounts/${config.accountId}/pages/projects/${config.projectName}`,
@@ -22227,7 +22228,7 @@ async function getPagesProject() {
     throw new Error("Failed to get Cloudflare Pages project, API returned non-200");
   }
   const { result } = await response.json();
-  if (result === null) {
+  if (!result) {
     throw new Error(
       "Failed to get Cloudflare Pages project, project does not exist. Check the project name or create it!"
     );
@@ -22254,6 +22255,11 @@ async function getPagesDeployment() {
   const {
     result: [deployment]
   } = await response.json();
+  if (!deployment) {
+    throw new Error(
+      `Failed to get Cloudflare Pages deployment for project "${config.projectName}"`
+    );
+  }
   return deployment;
 }
 

@@ -1,8 +1,8 @@
 import { context } from '@actions/github';
 import { summary } from '@actions/core';
-import { config } from './config';
+import { config } from './config.js';
 import type { Deployment } from '@cloudflare/types';
-import type { Octokit } from './types';
+import type { Octokit } from './types.js';
 
 type CreateGHDeploymentOpts = {
 	octokit: Octokit;

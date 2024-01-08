@@ -42,7 +42,7 @@ async function main() {
 
 	let alias = pagesDeployment.url;
 	if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
-		alias = pagesDeployment.aliases[0];
+		alias = pagesDeployment.aliases[0]!; // we can assert that idx 0 exists
 	}
 	setOutput('alias', alias);
 
@@ -77,5 +77,6 @@ async function main() {
 try {
 	main();
 } catch (error) {
+	// @ts-expect-error always print the message
 	setFailed(error.message);
 }

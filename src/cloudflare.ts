@@ -1,8 +1,8 @@
 import shellac from 'shellac';
 import path from 'node:path';
 import { fetch } from 'undici';
-import { config } from './config';
-import { githubBranch, prBranchOwner } from './globals';
+import { config } from './config.js';
+import { githubBranch, prBranchOwner } from './globals.js';
 import type { Deployment, Project } from '@cloudflare/types';
 
 export async function getPagesProject() {
@@ -18,7 +18,7 @@ export async function getPagesProject() {
 	}
 
 	const { result } = (await response.json()) as { result: Project | null };
-	if (result === null) {
+	if (!result) {
 		throw new Error(
 			'Failed to get Cloudflare Pages project, project does not exist. Check the project name or create it!'
 		);
@@ -50,6 +50,12 @@ export async function getPagesDeployment() {
 	const {
 		result: [deployment],
 	} = (await response.json()) as { result: Deployment[] };
+
+	if (!deployment) {
+		throw new Error(
+			`Failed to get Cloudflare Pages deployment for project "${config.projectName}"`
+		);
+	}
 
 	return deployment;
 }

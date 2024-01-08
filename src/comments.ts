@@ -1,7 +1,7 @@
 import { context } from '@actions/github';
-import { isPR } from './globals';
-import { config } from './config';
-import type { Octokit } from './types';
+import { isPR } from './globals.js';
+import { config } from './config.js';
+import type { Octokit } from './types.js';
 
 type FindExistingCommentOpts = {
 	octokit: Octokit;

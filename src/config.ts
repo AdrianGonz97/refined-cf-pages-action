@@ -14,6 +14,7 @@ function loadConfig() {
 			wranglerVersion: getInput('wranglerVersion', { required: false }),
 		};
 	} catch (error) {
+		// @ts-expect-error always print the message
 		setFailed(error.message);
 		process.exit(1);
 	}
