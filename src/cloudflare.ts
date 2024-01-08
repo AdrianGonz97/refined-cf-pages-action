@@ -1,5 +1,6 @@
 import shellac from 'shellac';
 import path from 'node:path';
+import { fetch } from 'undici';
 import { config } from './config';
 import { githubBranch, prBranchOwner } from './globals';
 import type { Deployment, Project } from '@cloudflare/types';
