@@ -1,28 +1,28 @@
-import { getInput, setOutput, setFailed, summary } from "@actions/core";
-import type { Project, Deployment } from "@cloudflare/types";
-import { context, getOctokit } from "@actions/github";
-import shellac from "shellac";
-import { fetch } from "undici";
-import { env } from "process";
-import path from "node:path";
-import { findExistingComment } from "./comments.js";
+import { getInput, setOutput, setFailed, summary } from '@actions/core';
+import type { Project, Deployment } from '@cloudflare/types';
+import { context, getOctokit } from '@actions/github';
+import shellac from 'shellac';
+import { fetch } from 'undici';
+import { env } from 'process';
+import path from 'node:path';
+import { findExistingComment } from './comments.js';
 
 type Octokit = ReturnType<typeof getOctokit>;
 
 try {
-	const apiToken = getInput("apiToken", { required: true });
-	const accountId = getInput("accountId", { required: true });
-	const projectName = getInput("projectName", { required: true });
-	const directory = getInput("directory", { required: true });
-	const gitHubToken = getInput("gitHubToken", { required: false });
-	const branch = getInput("branch", { required: false });
-	const deploymentName = getInput("deploymentName", { required: false });
-	const workingDirectory = getInput("workingDirectory", { required: false });
-	const wranglerVersion = getInput("wranglerVersion", { required: false });
+	const apiToken = getInput('apiToken', { required: true });
+	const accountId = getInput('accountId', { required: true });
+	const projectName = getInput('projectName', { required: true });
+	const directory = getInput('directory', { required: true });
+	const gitHubToken = getInput('gitHubToken', { required: false });
+	const branch = getInput('branch', { required: false });
+	const deploymentName = getInput('deploymentName', { required: false });
+	const workingDirectory = getInput('workingDirectory', { required: false });
+	const wranglerVersion = getInput('wranglerVersion', { required: false });
 
 	const githubBranch = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
 	const username = context.payload.pull_request?.head.repo.owner.login;
-	const isPR = context.eventName === "pull_request" || context.eventName === "pull_request_target";
+	const isPR = context.eventName === 'pull_request' || context.eventName === 'pull_request_target';
 
 	async function getProject() {
 		const response = await fetch(
@@ -33,18 +33,25 @@ try {
 			console.error(`Cloudflare API returned non-200: ${response.status}`);
 			const json = await response.text();
 			console.error(`API returned: ${json}`);
-			throw new Error("Failed to get Pages project, API returned non-200");
+			throw new Error('Failed to get Pages project, API returned non-200');
 		}
 
 		const { result } = (await response.json()) as { result: Project | null };
 		if (result === null) {
-			throw new Error("Failed to get Pages project, project does not exist. Check the project name or create it!");
+			throw new Error(
+				'Failed to get Pages project, project does not exist. Check the project name or create it!'
+			);
 		}
 
 		return result;
 	}
 
-	async function createPRComment(octokit: Octokit, title: string, previewUrl: string, environment: string) {
+	async function createPRComment(
+		octokit: Octokit,
+		title: string,
+		previewUrl: string,
+		environment: string
+	) {
 		if (!isPR) return;
 
 		const messageId = `deployment-comment:${projectName}`;
@@ -55,7 +62,9 @@ try {
 | Name | Link |
 | :--- | :--- |
 | Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
-| Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId} |
+| Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${
+			context.repo.repo
+		}/actions/runs/${context.runId} |
 | Preview URL | ${previewUrl} |
 | Environment | ${environment} |
 `;
@@ -113,13 +122,17 @@ try {
 		return deployment;
 	}
 
-	async function createGitHubDeployment(octokit: Octokit, productionEnvironment: boolean, environment: string) {
+	async function createGitHubDeployment(
+		octokit: Octokit,
+		productionEnvironment: boolean,
+		environment: string
+	) {
 		const deployment = await octokit.rest.repos.createDeployment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			ref: context.payload.pull_request?.head.sha || context.ref,
 			auto_merge: false,
-			description: "Cloudflare Pages",
+			description: 'Cloudflare Pages',
 			required_contexts: [],
 			environment,
 			production_environment: productionEnvironment,
@@ -154,21 +167,21 @@ try {
 			environment_url: url,
 			production_environment: productionEnvironment,
 			log_url: `https://dash.cloudflare.com/${accountId}/pages/view/${projectName}/${deploymentId}`,
-			description: "Cloudflare Pages",
-			state: "success",
+			description: 'Cloudflare Pages',
+			state: 'success',
 			auto_inactive: false,
 		});
 	}
 
 	async function createJobSummary(opts: { deployment: Deployment; aliasUrl: string }) {
 		const { aliasUrl, deployment } = opts;
-		const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
+		const deployStage = deployment.stages.find((stage) => stage.name === 'deploy');
 
-		let deploymentStatus = "⚡️ Deployment in progress...";
-		if (deployStage?.status === "success") {
-			deploymentStatus = "✅ Deployment successful!";
-		} else if (deployStage?.status === "failure") {
-			deploymentStatus = "🚫 Deployment failed";
+		let deploymentStatus = '⚡️ Deployment in progress...';
+		if (deployStage?.status === 'success') {
+			deploymentStatus = '✅ Deployment successful!';
+		} else if (deployStage?.status === 'failure') {
+			deploymentStatus = '🚫 Deployment failed';
 		}
 
 		await summary
@@ -178,7 +191,10 @@ try {
 
 | Name                    | Result |
 | ----------------------- | - |
-| **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(0, 8)}\` |
+| **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(
+					0,
+					8
+				)}\` |
 | **Status**:             | ${deploymentStatus} |
 | **Preview URL**:        | ${deployment.url} |
 | **Branch Preview URL**: | ${aliasUrl} |
@@ -190,27 +206,37 @@ try {
 	(async () => {
 		const project = await getProject();
 
-		const productionEnvironment = githubBranch === project.production_branch || branch === project.production_branch;
-		const environmentName = deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
+		const productionEnvironment =
+			githubBranch === project.production_branch || branch === project.production_branch;
+		const environmentName = deploymentName || `${productionEnvironment ? 'Production' : 'Preview'}`;
 
 		let gitHubDeployment: Awaited<ReturnType<typeof createGitHubDeployment>>;
 
 		if (gitHubToken && gitHubToken.length) {
 			const octokit = getOctokit(gitHubToken);
-			await createPRComment(octokit, "⚡️ Preparing Cloudflare Pages deployment", "🔨 Building Preview", "...");
-			gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
+			await createPRComment(
+				octokit,
+				'⚡️ Preparing Cloudflare Pages deployment',
+				'🔨 Building Preview',
+				'...'
+			);
+			gitHubDeployment = await createGitHubDeployment(
+				octokit,
+				productionEnvironment,
+				environmentName
+			);
 		}
 
 		const pagesDeployment = await createPagesDeployment(productionEnvironment);
-		setOutput("id", pagesDeployment.id);
-		setOutput("url", pagesDeployment.url);
-		setOutput("environment", pagesDeployment.environment);
+		setOutput('id', pagesDeployment.id);
+		setOutput('url', pagesDeployment.url);
+		setOutput('environment', pagesDeployment.environment);
 
 		let alias = pagesDeployment.url;
 		if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
 			alias = pagesDeployment.aliases[0];
 		}
-		setOutput("alias", alias);
+		setOutput('alias', alias);
 
 		await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
@@ -228,7 +254,7 @@ try {
 
 			await createPRComment(
 				octokit,
-				"✅ Successful Cloudflare Pages deployment",
+				'✅ Successful Cloudflare Pages deployment',
 				pagesDeployment.url,
 				pagesDeployment.environment
 			);

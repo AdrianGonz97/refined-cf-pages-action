@@ -81,15 +81,15 @@ By default Wrangler will run in the root package directory. If your app lives in
 You can use the newly released [Wrangler v3](https://blog.cloudflare.com/wrangler3/) with the `wranglerVersion` property.
 
 ```yaml
-  - name: Publish to Cloudflare Pages
-    uses: cloudflare/pages-action@v1
-    with:
-      apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      accountId: YOUR_ACCOUNT_ID
-      projectName: YOUR_PROJECT_NAME
-      directory: YOUR_BUILD_OUTPUT_DIRECTORY
-      # Enable Wrangler v3
-      wranglerVersion: '3'
+- name: Publish to Cloudflare Pages
+  uses: cloudflare/pages-action@v1
+  with:
+    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    accountId: YOUR_ACCOUNT_ID
+    projectName: YOUR_PROJECT_NAME
+    directory: YOUR_BUILD_OUTPUT_DIRECTORY
+    # Enable Wrangler v3
+    wranglerVersion: '3'
 ```
 
 ## Outputs

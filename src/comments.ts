@@ -1,4 +1,4 @@
-import type { getOctokit } from "@actions/github";
+import type { getOctokit } from '@actions/github';
 
 type Octokit = ReturnType<typeof getOctokit>;
 
@@ -18,7 +18,10 @@ export async function findExistingComment(opts: {
 
 	let found;
 
-	for await (const comments of opts.octokit.paginate.iterator(opts.octokit.rest.issues.listComments, params)) {
+	for await (const comments of opts.octokit.paginate.iterator(
+		opts.octokit.rest.issues.listComments,
+		params
+	)) {
 		found = comments.data.find(({ body }) => {
 			return (body?.search(opts.messageId) ?? -1) > -1;
 		});
