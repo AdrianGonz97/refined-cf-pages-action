@@ -1,6 +1,8 @@
+> This is an opinionated fork of the official pages action: https://github.com/cloudflare/pages-action
+
 # Cloudflare Pages GitHub Action
 
-GitHub Action for creating Cloudflare Pages deployments, using the new [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature and [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli) integration.
+GitHub Action for creating Cloudflare Pages deployments, using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
 
 ## Usage
 
@@ -55,12 +57,12 @@ If you do not have a zone registered to your account, you can also get your acco
 To generate an API token:
 
 1. Log in to the Cloudflare dashboard.
-2. Select My Profile from the dropdown menu of your user icon on the top right of your dashboard.
-3. Select API Tokens > Create Token.
-4. Under Custom Token, select Get started.
-5. Name your API Token in the Token name field.
-6. Under Permissions, select Account, Cloudflare Pages and Edit:
-7. Select Continue to summary > Create Token.
+1. Select My Profile from the dropdown menu of your user icon on the top right of your dashboard.
+1. Select API Tokens > Create Token.
+1. Under Custom Token, select Get started.
+1. Name your API Token in the Token name field.
+1. Under Permissions, select Account, Cloudflare Pages and Edit:
+1. Select Continue to summary > Create Token.
 
 More information can be found on [our guide for making Direct Upload deployments with continuous integration](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/#use-github-actions).
 

@@ -1,8 +1,5 @@
 name: 'Cloudflare Pages GitHub Action'
 description: 'Publish to Cloudflare Pages with PR previews'
-branding:
-  icon: 'upload-cloud'
-  color: 'orange'
 inputs:
   apiToken:
     description: 'Cloudflare API Token'
