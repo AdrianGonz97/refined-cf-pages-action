@@ -15,7 +15,6 @@ function loadConfig() {
 		};
 	} catch (error) {
 		setFailed(error.message);
-	} finally {
 		process.exit(1);
 	}
 }

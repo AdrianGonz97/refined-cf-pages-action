@@ -7568,7 +7568,6 @@ function loadConfig() {
     };
   } catch (error) {
     (0, import_core.setFailed)(error.message);
-  } finally {
     process.exit(1);
   }
 }
