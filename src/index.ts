@@ -11,11 +11,7 @@ import {
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
 
 async function main() {
-	const project = await getPagesProject({
-		accountId: config.accountId,
-		apiToken: config.apiToken,
-		projectName: config.projectName,
-	});
+	const project = await getPagesProject();
 
 	const productionEnvironment =
 		githubBranch === project.production_branch || config.branch === project.production_branch;
@@ -28,7 +24,6 @@ async function main() {
 		const octokit = getOctokit(config.gitHubToken);
 		await createPRComment({
 			octokit,
-			projectName: config.projectName,
 			title: '⚡️ Preparing Cloudflare Pages deployment',
 			previewUrl: '🔨 Building Preview',
 			environment: '...',
@@ -58,8 +53,6 @@ async function main() {
 
 		await createGitHubDeploymentStatus({
 			octokit,
-			accountId: config.accountId,
-			projectName: config.projectName,
 			environmentName,
 			productionEnvironment,
 			deploymentId: gitHubDeployment.id,
@@ -69,7 +62,6 @@ async function main() {
 
 		await createPRComment({
 			octokit,
-			projectName: config.projectName,
 			title: '✅ Successful Cloudflare Pages deployment',
 			previewUrl: pagesDeployment.url,
 			environment: pagesDeployment.environment,

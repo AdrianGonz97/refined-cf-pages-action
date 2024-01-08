@@ -8757,11 +8757,7 @@ async function getPagesDeployment() {
 
 // src/index.ts
 async function main() {
-  const project = await getPagesProject({
-    accountId: config.accountId,
-    apiToken: config.apiToken,
-    projectName: config.projectName
-  });
+  const project = await getPagesProject();
   const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
   const environmentName2 = config.deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
   let gitHubDeployment;
@@ -8769,7 +8765,6 @@ async function main() {
     const octokit = (0, import_github4.getOctokit)(config.gitHubToken);
     await createPRComment({
       octokit,
-      projectName: config.projectName,
       title: "\u26A1\uFE0F Preparing Cloudflare Pages deployment",
       previewUrl: "\u{1F528} Building Preview",
       environment: "..."
@@ -8794,8 +8789,6 @@ async function main() {
     const octokit = (0, import_github4.getOctokit)(config.gitHubToken);
     await createGitHubDeploymentStatus({
       octokit,
-      accountId: config.accountId,
-      projectName: config.projectName,
       environmentName: environmentName2,
       productionEnvironment,
       deploymentId: gitHubDeployment.id,
@@ -8804,7 +8797,6 @@ async function main() {
     });
     await createPRComment({
       octokit,
-      projectName: config.projectName,
       title: "\u2705 Successful Cloudflare Pages deployment",
       previewUrl: pagesDeployment.url,
       environment: pagesDeployment.environment
