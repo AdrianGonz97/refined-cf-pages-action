@@ -17,7 +17,7 @@ jobs:
           accountId: 468cce80dfb431f3a4058e6dc6031a44
           projectName: github-actions-example
           directory: example
-          gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
         id: publish
       - name: Outputs
         run: |

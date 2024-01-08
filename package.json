@@ -1,17 +1,20 @@
 {
-	"name": "pages-action",
-	"version": "1.5.0",
-	"description": "Publish to Cloudflare Pages",
-	"main": "index.js",
+	"name": "cf-pages-action",
+	"version": "1.0.0",
+	"description": "Publish to Cloudflare Pages with PR previews",
+	"main": "dist/index.js",
 	"scripts": {
-		"build": "npx esbuild src/index.ts --bundle --platform=node --target=es2021 --outfile=index.js",
-		"dev": "npx esbuild src/index.ts --bundle --platform=node --target=es2021 --outfile=index.js --watch",
+		"build": "pnpm tsup",
+		"dev": "pnpm tsup --watch",
 		"prepare": "husky install",
-		"prettify": "prettier . --write --ignore-unknown"
+		"format": "prettier . --write --ignore-unknown",
+		"format:check": "prettier --check .",
+		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"check": "pnpm tsc"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/cloudflare/pages-action.git"
+		"url": "git+https://github.com/AdrianGonz97/cf-pages-action.git"
 	},
 	"keywords": [
 		"Cloudflare Pages",
@@ -19,21 +22,23 @@
 	],
 	"license": "MIT",
 	"bugs": {
-		"url": "https://github.com/cloudflare/pages-action/issues"
+		"url": "https://github.com/AdrianGonz97/cf-pages-action/issues"
 	},
-	"homepage": "https://github.com/cloudflare/pages-action#readme",
-	"dependencies": {
+	"homepage": "https://github.com/AdrianGonz97/cf-pages-action#readme",
+	"devDependencies": {
 		"@actions/core": "^1.10.0",
 		"@actions/github": "^5.1.1",
 		"@cloudflare/types": "^6.18.16",
-		"shellac": "^0.7.2",
-		"undici": "^5.11.0"
-	},
-	"devDependencies": {
 		"@types/node": "^18.11.3",
-		"esbuild": "^0.15.12",
+		"@typescript-eslint/eslint-plugin": "^6.18.0",
+		"@typescript-eslint/parser": "^6.18.0",
+		"eslint": "^8.56.0",
+		"eslint-config-prettier": "^9.1.0",
 		"husky": "^8.0.1",
-		"prettier": "^2.8.1",
-		"typescript": "^4.6.4"
+		"prettier": "^3.1.1",
+		"shellac": "^0.7.2",
+		"tsup": "^8.0.1",
+		"typescript": "^5.3.3",
+		"undici": "^5.11.0"
 	}
 }

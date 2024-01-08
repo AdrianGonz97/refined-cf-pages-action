@@ -1,6 +1,8 @@
+> This is an opinionated fork of the official pages action: https://github.com/cloudflare/pages-action
+
 # Cloudflare Pages GitHub Action
 
-GitHub Action for creating Cloudflare Pages deployments, using the new [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature and [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli) integration.
+GitHub Action for creating Cloudflare Pages deployments, using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
 
 ## Usage
 
@@ -32,7 +34,7 @@ GitHub Action for creating Cloudflare Pages deployments, using the new [Direct U
              projectName: YOUR_PROJECT_NAME
              directory: YOUR_BUILD_OUTPUT_DIRECTORY
              # Optional: Enable this if you want to have GitHub Deployments triggered
-             gitHubToken: ${{ secrets.GITHUB_TOKEN }}
+             githubToken: ${{ secrets.GITHUB_TOKEN }}
              # Optional: Switch what branch you are publishing to.
              # By default this will be the branch which triggered this workflow
              branch: main
@@ -55,14 +57,14 @@ If you do not have a zone registered to your account, you can also get your acco
 To generate an API token:
 
 1. Log in to the Cloudflare dashboard.
-2. Select My Profile from the dropdown menu of your user icon on the top right of your dashboard.
-3. Select API Tokens > Create Token.
-4. Under Custom Token, select Get started.
-5. Name your API Token in the Token name field.
-6. Under Permissions, select Account, Cloudflare Pages and Edit:
-7. Select Continue to summary > Create Token.
+1. Select My Profile from the dropdown menu of your user icon on the top right of your dashboard.
+1. Select API Tokens > Create Token.
+1. Under Custom Token, select Get started.
+1. Name your API Token in the Token name field.
+1. Under Permissions, select Account, Cloudflare Pages and Edit:
+1. Select Continue to summary > Create Token.
 
-More information can be found on [our guide for making Direct Upload deployments with continous integration](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/#use-github-actions).
+More information can be found on [our guide for making Direct Upload deployments with continuous integration](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/#use-github-actions).
 
 ### Specifying a branch
 
@@ -81,15 +83,15 @@ By default Wrangler will run in the root package directory. If your app lives in
 You can use the newly released [Wrangler v3](https://blog.cloudflare.com/wrangler3/) with the `wranglerVersion` property.
 
 ```yaml
-  - name: Publish to Cloudflare Pages
-    uses: cloudflare/pages-action@v1
-    with:
-      apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-      accountId: YOUR_ACCOUNT_ID
-      projectName: YOUR_PROJECT_NAME
-      directory: YOUR_BUILD_OUTPUT_DIRECTORY
-      # Enable Wrangler v3
-      wranglerVersion: '3'
+- name: Publish to Cloudflare Pages
+  uses: cloudflare/pages-action@v1
+  with:
+    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    accountId: YOUR_ACCOUNT_ID
+    projectName: YOUR_PROJECT_NAME
+    directory: YOUR_BUILD_OUTPUT_DIRECTORY
+    # Enable Wrangler v3
+    wranglerVersion: '3'
 ```
 
 ## Outputs
