@@ -7,7 +7,9 @@
 		"build": "pnpm tsup",
 		"dev": "pnpm tsup --watch",
 		"prepare": "husky install",
-		"format": "prettier . --write --ignore-unknown"
+		"format": "prettier . --write --ignore-unknown",
+		"format:check": "prettier --check .",
+		"lint": "prettier --plugin-search-dir . --check . && eslint ."
 	},
 	"repository": {
 		"type": "git",
