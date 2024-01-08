@@ -3,7 +3,6 @@
 	"version": "1.0.0",
 	"description": "Publish to Cloudflare Pages with PR previews",
 	"main": "dist/index.js",
-	"type": "module",
 	"scripts": {
 		"build": "pnpm tsup",
 		"dev": "pnpm tsup --watch",
