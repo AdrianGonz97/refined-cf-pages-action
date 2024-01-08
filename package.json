@@ -9,7 +9,8 @@
 		"prepare": "husky install",
 		"format": "prettier . --write --ignore-unknown",
 		"format:check": "prettier --check .",
-		"lint": "prettier --plugin-search-dir . --check . && eslint ."
+		"lint": "prettier --plugin-search-dir . --check . && eslint .",
+		"check": "pnpm tsc"
 	},
 	"repository": {
 		"type": "git",
