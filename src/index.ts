@@ -15,23 +15,21 @@ async function main() {
 
 	const productionEnvironment =
 		githubBranch === project.production_branch || config.branch === project.production_branch;
-	const environmentName =
-		config.deploymentName || `${productionEnvironment ? 'Production' : 'Preview'}`;
+
+	const octokit = getOctokit(config.githubToken);
+	await createPRComment({
+		octokit,
+		title: '⚡️ Preparing Cloudflare Pages deployment',
+		previewUrl: '🔨 Building Preview',
+		environment: '...',
+	});
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
-
-	if (config.githubToken && config.githubToken.length) {
-		const octokit = getOctokit(config.githubToken);
-		await createPRComment({
-			octokit,
-			title: '⚡️ Preparing Cloudflare Pages deployment',
-			previewUrl: '🔨 Building Preview',
-			environment: '...',
-		});
+	if (config.deploymentName.length > 0) {
 		githubDeployment = await createGithubDeployment({
 			octokit,
 			productionEnvironment,
-			environment: environmentName,
+			environment: config.deploymentName,
 		});
 	}
 
@@ -49,29 +47,27 @@ async function main() {
 	await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
 	if (githubDeployment) {
-		const octokit = getOctokit(config.githubToken);
-
 		await createGithubDeploymentStatus({
 			octokit,
-			environmentName,
 			productionEnvironment,
+			environmentName: githubDeployment.environment,
 			deploymentId: githubDeployment.id,
 			environmentUrl: pagesDeployment.url,
 			cfDeploymentId: pagesDeployment.id,
 		});
-
-		await createPRComment({
-			octokit,
-			title: '✅ Successful Cloudflare Pages deployment',
-			previewUrl: pagesDeployment.url,
-			environment: pagesDeployment.environment,
-		});
-
-		// we sleep to give CF enough time to update their deployment status
-		await new Promise((resolve) => setTimeout(resolve, 5000));
-		const deployment = await getPagesDeployment();
-		await createJobSummary({ deployment, aliasUrl: alias });
 	}
+
+	await createPRComment({
+		octokit,
+		title: '✅ Successful Cloudflare Pages deployment',
+		previewUrl: pagesDeployment.url,
+		environment: pagesDeployment.environment,
+	});
+
+	// we sleep to give CF enough time to update their deployment status
+	await new Promise((resolve) => setTimeout(resolve, 5000));
+	const deployment = await getPagesDeployment();
+	await createJobSummary({ deployment, aliasUrl: alias });
 }
 
 try {

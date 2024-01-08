@@ -23415,20 +23415,19 @@ async function getPagesDeployment() {
 async function main() {
   const project = await getPagesProject();
   const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
-  const environmentName = config.deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
+  const octokit = (0, import_github4.getOctokit)(config.githubToken);
+  await createPRComment({
+    octokit,
+    title: "\u26A1\uFE0F Preparing Cloudflare Pages deployment",
+    previewUrl: "\u{1F528} Building Preview",
+    environment: "..."
+  });
   let githubDeployment;
-  if (config.githubToken && config.githubToken.length) {
-    const octokit = (0, import_github4.getOctokit)(config.githubToken);
-    await createPRComment({
-      octokit,
-      title: "\u26A1\uFE0F Preparing Cloudflare Pages deployment",
-      previewUrl: "\u{1F528} Building Preview",
-      environment: "..."
-    });
+  if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({
       octokit,
       productionEnvironment,
-      environment: environmentName
+      environment: config.deploymentName
     });
   }
   const pagesDeployment = await createPagesDeployment(productionEnvironment);
@@ -23442,25 +23441,24 @@ async function main() {
   (0, import_core3.setOutput)("alias", alias);
   await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
   if (githubDeployment) {
-    const octokit = (0, import_github4.getOctokit)(config.githubToken);
     await createGithubDeploymentStatus({
       octokit,
-      environmentName,
       productionEnvironment,
+      environmentName: githubDeployment.environment,
       deploymentId: githubDeployment.id,
       environmentUrl: pagesDeployment.url,
       cfDeploymentId: pagesDeployment.id
     });
-    await createPRComment({
-      octokit,
-      title: "\u2705 Successful Cloudflare Pages deployment",
-      previewUrl: pagesDeployment.url,
-      environment: pagesDeployment.environment
-    });
-    await new Promise((resolve) => setTimeout(resolve, 5e3));
-    const deployment = await getPagesDeployment();
-    await createJobSummary({ deployment, aliasUrl: alias });
   }
+  await createPRComment({
+    octokit,
+    title: "\u2705 Successful Cloudflare Pages deployment",
+    previewUrl: pagesDeployment.url,
+    environment: pagesDeployment.environment
+  });
+  await new Promise((resolve) => setTimeout(resolve, 5e3));
+  const deployment = await getPagesDeployment();
+  await createJobSummary({ deployment, aliasUrl: alias });
 }
 try {
   main();
