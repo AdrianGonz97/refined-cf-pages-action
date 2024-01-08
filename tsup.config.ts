@@ -8,4 +8,5 @@ export default defineConfig({
 	target: 'es2021',
 	platform: 'node',
 	bundle: true,
+	skipNodeModulesBundle: false,
 });

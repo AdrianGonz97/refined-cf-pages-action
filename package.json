@@ -23,13 +23,9 @@
 		"url": "https://github.com/AdrianGonz97/cf-pages-action/issues"
 	},
 	"homepage": "https://github.com/AdrianGonz97/cf-pages-action#readme",
-	"dependencies": {
+	"devDependencies": {
 		"@actions/core": "^1.10.0",
 		"@actions/github": "^5.1.1",
-		"shellac": "^0.7.2",
-		"undici": "^5.11.0"
-	},
-	"devDependencies": {
 		"@cloudflare/types": "^6.18.16",
 		"@types/node": "^18.11.3",
 		"@typescript-eslint/eslint-plugin": "^6.18.0",
@@ -38,7 +34,9 @@
 		"eslint-config-prettier": "^9.1.0",
 		"husky": "^8.0.1",
 		"prettier": "^3.1.1",
+		"shellac": "^0.7.2",
 		"tsup": "^8.0.1",
-		"typescript": "^5.3.3"
+		"typescript": "^5.3.3",
+		"undici": "^5.11.0"
 	}
 }
