@@ -21175,7 +21175,7 @@ async function createGitHubDeploymentStatus(opts) {
     owner: import_github3.context.repo.owner,
     repo: import_github3.context.repo.repo,
     deployment_id: opts.deploymentId,
-    environment: environmentName,
+    environment: opts.environmentName,
     environment_url: opts.environmentUrl,
     production_environment: opts.productionEnvironment,
     log_url: `https://dash.cloudflare.com/${config.accountId}/pages/view/${config.projectName}/${opts.cfDeploymentId}`,
@@ -22267,7 +22267,7 @@ async function getPagesDeployment() {
 async function main() {
   const project = await getPagesProject();
   const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
-  const environmentName2 = config.deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
+  const environmentName = config.deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
   let gitHubDeployment;
   if (config.gitHubToken && config.gitHubToken.length) {
     const octokit = (0, import_github4.getOctokit)(config.gitHubToken);
@@ -22280,7 +22280,7 @@ async function main() {
     gitHubDeployment = await createGitHubDeployment({
       octokit,
       productionEnvironment,
-      environment: environmentName2
+      environment: environmentName
     });
   }
   const pagesDeployment = await createPagesDeployment(productionEnvironment);
@@ -22297,7 +22297,7 @@ async function main() {
     const octokit = (0, import_github4.getOctokit)(config.gitHubToken);
     await createGitHubDeploymentStatus({
       octokit,
-      environmentName: environmentName2,
+      environmentName,
       productionEnvironment,
       deploymentId: gitHubDeployment.id,
       environmentUrl: pagesDeployment.url,

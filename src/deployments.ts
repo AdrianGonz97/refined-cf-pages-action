@@ -45,7 +45,7 @@ export async function createGitHubDeploymentStatus(opts: CreateGHDeploymentStatu
 		repo: context.repo.repo,
 		deployment_id: opts.deploymentId,
 		// @ts-expect-error this should accept a string
-		environment: environmentName,
+		environment: opts.environmentName,
 		environment_url: opts.environmentUrl,
 		production_environment: opts.productionEnvironment,
 		log_url: `https://dash.cloudflare.com/${config.accountId}/pages/view/${config.projectName}/${opts.cfDeploymentId}`,
