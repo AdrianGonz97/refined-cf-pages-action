@@ -1,5 +1,5 @@
 {
-	"name": "pages-action",
+	"name": "cf-pages-action",
 	"version": "1.0.0",
 	"description": "Publish to Cloudflare Pages with PR previews",
 	"main": "dist/index.js",
