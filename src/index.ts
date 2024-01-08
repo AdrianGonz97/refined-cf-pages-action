@@ -4,8 +4,8 @@ import { config } from './config.js';
 import { createPRComment } from './comments.js';
 import { githubBranch } from './globals.js';
 import {
-	createGitHubDeployment,
-	createGitHubDeploymentStatus,
+	createGithubDeployment,
+	createGithubDeploymentStatus,
 	createJobSummary,
 } from './deployments.js';
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
@@ -18,17 +18,17 @@ async function main() {
 	const environmentName =
 		config.deploymentName || `${productionEnvironment ? 'Production' : 'Preview'}`;
 
-	let gitHubDeployment: Awaited<ReturnType<typeof createGitHubDeployment>>;
+	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 
-	if (config.gitHubToken && config.gitHubToken.length) {
-		const octokit = getOctokit(config.gitHubToken);
+	if (config.githubToken && config.githubToken.length) {
+		const octokit = getOctokit(config.githubToken);
 		await createPRComment({
 			octokit,
 			title: '⚡️ Preparing Cloudflare Pages deployment',
 			previewUrl: '🔨 Building Preview',
 			environment: '...',
 		});
-		gitHubDeployment = await createGitHubDeployment({
+		githubDeployment = await createGithubDeployment({
 			octokit,
 			productionEnvironment,
 			environment: environmentName,
@@ -48,14 +48,14 @@ async function main() {
 
 	await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
 
-	if (gitHubDeployment) {
-		const octokit = getOctokit(config.gitHubToken);
+	if (githubDeployment) {
+		const octokit = getOctokit(config.githubToken);
 
-		await createGitHubDeploymentStatus({
+		await createGithubDeploymentStatus({
 			octokit,
 			environmentName,
 			productionEnvironment,
-			deploymentId: gitHubDeployment.id,
+			deploymentId: githubDeployment.id,
 			environmentUrl: pagesDeployment.url,
 			cfDeploymentId: pagesDeployment.id,
 		});

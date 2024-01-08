@@ -22210,7 +22210,7 @@ function loadConfig() {
       accountId: (0, import_core.getInput)("accountId", { required: true }),
       projectName: (0, import_core.getInput)("projectName", { required: true }),
       directory: (0, import_core.getInput)("directory", { required: true }),
-      gitHubToken: (0, import_core.getInput)("gitHubToken", { required: false }),
+      githubToken: (0, import_core.getInput)("githubToken", { required: false }),
       branch: (0, import_core.getInput)("branch", { required: false }),
       deploymentName: (0, import_core.getInput)("deploymentName", { required: false }),
       workingDirectory: (0, import_core.getInput)("workingDirectory", { required: false }),
@@ -22298,7 +22298,7 @@ async function createPRComment(opts) {
 // src/deployments.ts
 var import_github3 = __toESM(require_github());
 var import_core2 = __toESM(require_core());
-async function createGitHubDeployment({
+async function createGithubDeployment({
   octokit,
   productionEnvironment,
   environment
@@ -22317,7 +22317,7 @@ async function createGitHubDeployment({
     return deployment.data;
   }
 }
-async function createGitHubDeploymentStatus(opts) {
+async function createGithubDeploymentStatus(opts) {
   return opts.octokit.rest.repos.createDeploymentStatus({
     owner: import_github3.context.repo.owner,
     repo: import_github3.context.repo.repo,
@@ -23416,16 +23416,16 @@ async function main() {
   const project = await getPagesProject();
   const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
   const environmentName = config.deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
-  let gitHubDeployment;
-  if (config.gitHubToken && config.gitHubToken.length) {
-    const octokit = (0, import_github4.getOctokit)(config.gitHubToken);
+  let githubDeployment;
+  if (config.githubToken && config.githubToken.length) {
+    const octokit = (0, import_github4.getOctokit)(config.githubToken);
     await createPRComment({
       octokit,
       title: "\u26A1\uFE0F Preparing Cloudflare Pages deployment",
       previewUrl: "\u{1F528} Building Preview",
       environment: "..."
     });
-    gitHubDeployment = await createGitHubDeployment({
+    githubDeployment = await createGithubDeployment({
       octokit,
       productionEnvironment,
       environment: environmentName
@@ -23441,13 +23441,13 @@ async function main() {
   }
   (0, import_core3.setOutput)("alias", alias);
   await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
-  if (gitHubDeployment) {
-    const octokit = (0, import_github4.getOctokit)(config.gitHubToken);
-    await createGitHubDeploymentStatus({
+  if (githubDeployment) {
+    const octokit = (0, import_github4.getOctokit)(config.githubToken);
+    await createGithubDeploymentStatus({
       octokit,
       environmentName,
       productionEnvironment,
-      deploymentId: gitHubDeployment.id,
+      deploymentId: githubDeployment.id,
       environmentUrl: pagesDeployment.url,
       cfDeploymentId: pagesDeployment.id
     });

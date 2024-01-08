@@ -16,9 +16,9 @@ inputs:
   directory:
     description: 'The directory of static assets to upload'
     required: true
-  gitHubToken:
+  githubToken:
     description: 'GitHub Token'
-    required: false
+    required: true
   branch:
     description: 'The name of the branch you want to deploy to'
     required: false

@@ -9,7 +9,7 @@ type CreateGHDeploymentOpts = {
 	productionEnvironment: boolean;
 	environment: string;
 };
-export async function createGitHubDeployment({
+export async function createGithubDeployment({
 	octokit,
 	productionEnvironment,
 	environment,
@@ -39,7 +39,7 @@ type CreateGHDeploymentStatusOpts = {
 	productionEnvironment: boolean;
 };
 
-export async function createGitHubDeploymentStatus(opts: CreateGHDeploymentStatusOpts) {
+export async function createGithubDeploymentStatus(opts: CreateGHDeploymentStatusOpts) {
 	return opts.octokit.rest.repos.createDeploymentStatus({
 		owner: context.repo.owner,
 		repo: context.repo.repo,

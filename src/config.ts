@@ -7,7 +7,7 @@ function loadConfig() {
 			accountId: getInput('accountId', { required: true }),
 			projectName: getInput('projectName', { required: true }),
 			directory: getInput('directory', { required: true }),
-			gitHubToken: getInput('gitHubToken', { required: false }),
+			githubToken: getInput('githubToken', { required: false }),
 			branch: getInput('branch', { required: false }),
 			deploymentName: getInput('deploymentName', { required: false }),
 			workingDirectory: getInput('workingDirectory', { required: false }),
