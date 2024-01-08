@@ -22061,6 +22061,32 @@ var src_default = shellac;
 var import_undici = __toESM(require_undici());
 var import_process = require("process");
 var import_node_path = __toESM(require("path"));
+
+// src/comments.ts
+async function findExistingComment(opts) {
+  const params = {
+    owner: opts.owner,
+    repo: opts.repo,
+    issue_number: opts.issueNumber,
+    per_page: 100
+  };
+  let found;
+  for await (const comments of opts.octokit.paginate.iterator(opts.octokit.rest.issues.listComments, params)) {
+    found = comments.data.find(({ body }) => {
+      return (body?.search(opts.messageId) ?? -1) > -1;
+    });
+    if (found) {
+      break;
+    }
+  }
+  if (found) {
+    const { id, body } = found;
+    return { id, body };
+  }
+  return;
+}
+
+// src/index.ts
 try {
   const apiToken = (0, import_core.getInput)("apiToken", { required: true });
   const accountId = (0, import_core.getInput)("accountId", { required: true });
@@ -22068,11 +22094,13 @@ try {
   const directory = (0, import_core.getInput)("directory", { required: true });
   const gitHubToken = (0, import_core.getInput)("gitHubToken", { required: false });
   const branch = (0, import_core.getInput)("branch", { required: false });
+  const deploymentName = (0, import_core.getInput)("deploymentName", { required: false });
   const workingDirectory = (0, import_core.getInput)("workingDirectory", { required: false });
   const wranglerVersion = (0, import_core.getInput)("wranglerVersion", { required: false });
   const githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
   const username = import_github.context.payload.pull_request?.head.repo.owner.login;
-  const getProject = async () => {
+  const isPR = import_github.context.eventName === "pull_request" || import_github.context.eventName === "pull_request_target";
+  async function getProject() {
     const response = await (0, import_undici.fetch)(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}`,
       { headers: { Authorization: `Bearer ${apiToken}` } }
@@ -22088,7 +22116,44 @@ try {
       throw new Error("Failed to get Pages project, project does not exist. Check the project name or create it!");
     }
     return result;
-  };
+  }
+  async function createPRComment(octokit, title, previewUrl, environment) {
+    if (!isPR)
+      return;
+    const messageId = `deployment-comment:${projectName}`;
+    const body = `<!-- ${messageId} -->
+
+### ${title}
+| Name | Link |
+| :--- | :--- |
+| Latest commit | ${import_github.context.payload.pull_request?.head.sha || import_github.context.ref} |
+| Latest deploy log | ${import_github.context.serverUrl}/${import_github.context.repo.owner}/${import_github.context.repo.repo}/actions/runs/${import_github.context.runId} |
+| Preview URL | ${previewUrl} |
+| Environment | ${environment} |
+`;
+    const existingComment = await findExistingComment({
+      octokit,
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
+      issueNumber: import_github.context.issue.number,
+      messageId
+    });
+    if (existingComment !== void 0) {
+      return await octokit.rest.issues.updateComment({
+        owner: import_github.context.repo.owner,
+        repo: import_github.context.repo.repo,
+        issue_number: import_github.context.issue.number,
+        comment_id: existingComment.id,
+        body
+      });
+    }
+    return await octokit.rest.issues.createComment({
+      owner: import_github.context.repo.owner,
+      repo: import_github.context.repo.repo,
+      issue_number: import_github.context.issue.number,
+      body
+    });
+  }
   async function createPagesDeployment(isProd) {
     const branchName = isProd ? branch : `${username}-${branch || githubBranch}`;
     await src_default.in(import_node_path.default.join(process.cwd(), workingDirectory))`
@@ -22099,6 +22164,9 @@ try {
   
     $$ npx wrangler@${wranglerVersion} pages deploy "${directory}" --project-name="${projectName}" --branch="${branchName}"
     `;
+    return getPagesDeployment();
+  }
+  async function getPagesDeployment() {
     const response = await (0, import_undici.fetch)(
       `https://api.cloudflare.com/client/v4/accounts/${accountId}/pages/projects/${projectName}/deployments`,
       { headers: { Authorization: `Bearer ${apiToken}` } }
@@ -22112,7 +22180,7 @@ try {
     const deployment = await octokit.rest.repos.createDeployment({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
-      ref: import_github.context.ref,
+      ref: import_github.context.payload.pull_request?.head.sha || import_github.context.ref,
       auto_merge: false,
       description: "Cloudflare Pages",
       required_contexts: [],
@@ -22131,7 +22199,7 @@ try {
     productionEnvironment,
     octokit
   }) {
-    await octokit.rest.repos.createDeploymentStatus({
+    return octokit.rest.repos.createDeploymentStatus({
       owner: import_github.context.repo.owner,
       repo: import_github.context.repo.repo,
       deployment_id: id,
@@ -22144,13 +22212,14 @@ try {
       auto_inactive: false
     });
   }
-  async function createJobSummary({ deployment, aliasUrl }) {
+  async function createJobSummary(opts) {
+    const { aliasUrl, deployment } = opts;
     const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
-    let status = "\u26A1\uFE0F  Deployment in progress...";
+    let deploymentStatus = "\u26A1\uFE0F Deployment in progress...";
     if (deployStage?.status === "success") {
-      status = "\u2705  Deploy successful!";
+      deploymentStatus = "\u2705 Deployment successful!";
     } else if (deployStage?.status === "failure") {
-      status = "\u{1F6AB}  Deployment failed";
+      deploymentStatus = "\u{1F6AB} Deployment failed";
     }
     await import_core.summary.addRaw(
       `
@@ -22159,19 +22228,20 @@ try {
 | Name                    | Result |
 | ----------------------- | - |
 | **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(0, 8)}\` |
-| **Status**:             | ${status} |
+| **Status**:             | ${deploymentStatus} |
 | **Preview URL**:        | ${deployment.url} |
 | **Branch Preview URL**: | ${aliasUrl} |
       `
-    ).write();
+    ).write({ overwrite: true });
   }
   (async () => {
     const project = await getProject();
     const productionEnvironment = githubBranch === project.production_branch || branch === project.production_branch;
-    const environmentName = `${projectName} (${productionEnvironment ? "Production" : "Preview"})`;
+    const environmentName = deploymentName || `${productionEnvironment ? "Production" : "Preview"}`;
     let gitHubDeployment;
     if (gitHubToken && gitHubToken.length) {
       const octokit = (0, import_github.getOctokit)(gitHubToken);
+      await createPRComment(octokit, "\u26A1\uFE0F Preparing Cloudflare Pages deployment", "\u{1F528} Building Preview", "...");
       gitHubDeployment = await createGitHubDeployment(octokit, productionEnvironment, environmentName);
     }
     const pagesDeployment = await createPagesDeployment(productionEnvironment);
@@ -22194,6 +22264,15 @@ try {
         productionEnvironment,
         octokit
       });
+      await createPRComment(
+        octokit,
+        "\u2705 Successful Cloudflare Pages deployment",
+        pagesDeployment.url,
+        pagesDeployment.environment
+      );
+      await new Promise((resolve) => setTimeout(resolve, 5e3));
+      const deployment = await getPagesDeployment();
+      await createJobSummary({ deployment, aliasUrl: alias });
     }
   })();
 } catch (thrown) {
