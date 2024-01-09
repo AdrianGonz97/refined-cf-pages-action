@@ -1,13 +1,17 @@
-> This is an opinionated fork of the official pages action: https://github.com/cloudflare/pages-action
-
 # Cloudflare Pages GitHub Action
+
+> This is an opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
+
+> [!WARNING]
+> This action entirely replaces the Cloudflare Pages GitHub integration. You should really disable the automatic builds made by Cloudflare for the repo you are applying this action to. You can do so by following [these instructions](#disabling-the-cloudflare-pages-github-app-integration).
 
 GitHub Action for creating Cloudflare Pages deployments, using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
 
 ## Usage
 
-1. Create an API token in the Cloudflare dashboard with the "Cloudflare Pages — Edit" permission.
-1. Add that API token as a secret to your GitHub repository, `CLOUDFLARE_API_TOKEN`.
+1. [Locate your Cloudflare account ID](#get-account-id).
+1. [Generate an API token](#generate-an-api-token).
+1. Add the Cloudflare account ID and API token [as secrets to your GitHub repository](#add-cloudflare-credentials-to-github-secrets).
 1. Create a `.github/workflows/publish.yml` file in your repository:
 
    ```yml
@@ -30,11 +34,12 @@ GitHub Action for creating Cloudflare Pages deployments, using the [Direct Uploa
            uses: cloudflare/pages-action@v1
            with:
              apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-             accountId: YOUR_ACCOUNT_ID
+             accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
              projectName: YOUR_PROJECT_NAME
              directory: YOUR_BUILD_OUTPUT_DIRECTORY
-             # Optional: Enable this if you want to have GitHub Deployments triggered
              githubToken: ${{ secrets.GITHUB_TOKEN }}
+             # Optional: Supply a deployment name if you want to have GitHub Deployments triggered
+             deploymentName: Production
              # Optional: Switch what branch you are publishing to.
              # By default this will be the branch which triggered this workflow
              branch: main
@@ -44,7 +49,7 @@ GitHub Action for creating Cloudflare Pages deployments, using the [Direct Uploa
              wranglerVersion: '3'
    ```
 
-1. Replace `YOUR_ACCOUNT_ID`, `YOUR_PROJECT_NAME` and `YOUR_BUILD_OUTPUT_DIRECTORY` with the appropriate values to your Pages project.
+1. Replace `YOUR_PROJECT_NAME` and `YOUR_BUILD_OUTPUT_DIRECTORY` with the appropriate values to your Pages project.
 
 ### Get account ID
 
@@ -56,15 +61,32 @@ If you do not have a zone registered to your account, you can also get your acco
 
 To generate an API token:
 
-1. Log in to the Cloudflare dashboard.
-1. Select My Profile from the dropdown menu of your user icon on the top right of your dashboard.
-1. Select API Tokens > Create Token.
-1. Under Custom Token, select Get started.
-1. Name your API Token in the Token name field.
-1. Under Permissions, select Account, Cloudflare Pages and Edit:
-1. Select Continue to summary > Create Token.
+1. Log in to the [Cloudflare dashboard](https://dash.cloudflare.com).
+1. Select **My Profile** from the dropdown menu of your user icon on the top right of your dashboard.
+1. Select **API Tokens** > **Create Token**.
+1. Under **Custom Token**, select **Get started**.
+1. Name your API Token in the **Token name** field.
+1. Under **Permissions**, select **Account**, **Cloudflare Pages** and **Edit**:
+1. Select **Continue to summary** > **Create Token**.
 
-More information can be found on [our guide for making Direct Upload deployments with continuous integration](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/#use-github-actions).
+More information can be found on the [guide for making Direct Upload deployments with continuous integration](https://developers.cloudflare.com/pages/how-to/use-direct-upload-with-continuous-integration/#use-github-actions).
+
+### Add Cloudflare credentials to GitHub secrets
+
+1. Go to your project’s repository in GitHub.
+1. Under your repository’s name, select **Settings**.
+1. Select **Secrets and variables** > **Actions** > **New repository secret**
+1. Create one secret and put `CLOUDFLARE_ACCOUNT_ID` as the name with the value being your Cloudflare account ID.
+1. Create another secret and put `CLOUDFLARE_API_TOKEN` as the name with the value being your Cloudflare API token.
+
+### Disabling the Cloudflare Pages GitHub integration
+
+If you have already connected your repository to the [Cloudflare Pages GitHub integration](https://developers.cloudflare.com/pages/configuration/git-integration/), you'll need to disable it.
+
+1. Go to your project’s repository in GitHub.
+1. Under your repository’s name, select **Settings**.
+1. Select **GitHub Apps**, and next to Cloudflare Pages, select **Configure**
+1. Under **Repository access**, select **Only select repositories**, and remove your repository.
 
 ### Specifying a branch
 
@@ -78,27 +100,11 @@ manually by adding the argument `branch: YOUR_BRANCH_NAME`.
 
 By default Wrangler will run in the root package directory. If your app lives in a monorepo and you want to run Wrangler from its directory, add `workingDirectory: YOUR_PACKAGE_DIRECTORY`.
 
-### Wrangler v3
-
-You can use the newly released [Wrangler v3](https://blog.cloudflare.com/wrangler3/) with the `wranglerVersion` property.
-
-```yaml
-- name: Publish to Cloudflare Pages
-  uses: cloudflare/pages-action@v1
-  with:
-    apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-    accountId: YOUR_ACCOUNT_ID
-    projectName: YOUR_PROJECT_NAME
-    directory: YOUR_BUILD_OUTPUT_DIRECTORY
-    # Enable Wrangler v3
-    wranglerVersion: '3'
-```
-
 ## Outputs
 
-| Name          | Description                                         |
-| ------------- | --------------------------------------------------- |
-| `id`          | The ID of the pages deployment                      |
-| `url`         | The URL of the pages deployment                     |
-| `alias`       | The alias if it exists otherwise the deployment URL |
-| `environment` | The environment that was deployed to                |
+| Name          | Description                                           |
+| ------------- | ----------------------------------------------------- |
+| `id`          | The ID of the pages deployment                        |
+| `url`         | The URL of the pages deployment                       |
+| `alias`       | The alias, if it exists, otherwise the deployment URL |
+| `environment` | The environment that was deployed to                  |
