@@ -1,9 +1,6 @@
 # Cloudflare Pages GitHub Action
 
-> This is an opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
-
-> [!WARNING]
-> This action entirely replaces the Cloudflare Pages GitHub integration. You should [disable the automatic builds](#disabling-the-cloudflare-pages-github-app-integration) made by Cloudflare for the repository you are applying this action to.
+An opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
 
 GitHub Action for creating Cloudflare Pages deployments, using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
 
@@ -11,10 +8,13 @@ GitHub Action for creating Cloudflare Pages deployments, using the [Direct Uploa
 
 - ✅ Generated build summaries
 - ✅ Deploy multiple sites from a single monorepo
-- ✅ Preview builds of PRs from forked repositories, [a known issue](https://developers.cloudflare.com/pages/platform/known-issues/#builds-and-deployment) with official solutions
+- ✅ Builds site previews of PRs from forked repositories, [a known issue](https://developers.cloudflare.com/pages/platform/known-issues/#builds-and-deployment) with official solutions
 - ✅ Github Deployments on PRs from forks
 
 ## Usage
+
+> [!WARNING]
+> This action entirely replaces the Cloudflare Pages GitHub integration. Before continuing, you should [disable the automatic builds](#disabling-the-cloudflare-pages-github-integration) made by Cloudflare for the repository you are applying this action to.
 
 1. [Locate your Cloudflare account ID](#get-account-id).
 1. [Generate an API token](#generate-an-api-token).
