@@ -1,5 +1,5 @@
 <p align="center">
- <img align="center" src="https://raw.githubusercontent.com/AdrianGonz97/cf-pages-action/.github/assets/icon.png" height="96" />
+ <img align="center" src="https://raw.githubusercontent.com/AdrianGonz97/cf-pages-action/main/.github/assets/icon.png" height="96" />
  <h1 align="center">Refined Cloudflare Pages Action</h1>
 </p>
 
