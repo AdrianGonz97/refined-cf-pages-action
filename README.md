@@ -16,7 +16,7 @@ A GitHub Action for creating Cloudflare Pages deployments, using [Direct Upload]
 
 ## Usage
 
-> [!WARNING]
+> [!IMPORTANT]
 > This action entirely replaces the Cloudflare Pages GitHub integration. Before continuing, you should [disable the automatic builds](#disabling-the-cloudflare-pages-github-integration) made by Cloudflare for the repository you are applying this action to.
 
 1. [Locate your Cloudflare account ID](#get-account-id).
