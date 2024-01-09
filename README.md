@@ -1,4 +1,4 @@
-# Cloudflare Pages GitHub Action
+# Refined Cloudflare Pages Action
 
 > An opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
 
@@ -9,7 +9,7 @@ A GitHub Action for creating Cloudflare Pages deployments, using [Direct Upload]
 - ✅ Generated build summaries
 - ✅ Deploy multiple sites from a single monorepo
 - ✅ Builds site previews of PRs from forked repositories, [a known issue](https://developers.cloudflare.com/pages/platform/known-issues/#builds-and-deployment) with official solutions
-- ✅ Github Deployments on PRs from forks
+- ✅ GitHub Deployments on PRs from forks
 
 ## Usage
 
@@ -41,7 +41,7 @@ jobs:
       # Run a build step here if your project requires one
 
       - name: Publish to Cloudflare Pages
-        uses: AdrianGonz97/cf-pages-action@v1
+        uses: AdrianGonz97/refined-cf-pages-action@v1
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
