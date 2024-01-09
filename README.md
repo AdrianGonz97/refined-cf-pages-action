@@ -1,4 +1,7 @@
-# Refined Cloudflare Pages Action
+<p align="center">
+ <img align="center" src="https://raw.githubusercontent.com/AdrianGonz97/.github/assets/icon.png" height="96" />
+ <h1 align="center">Refined Cloudflare Pages Action</h1>
+</p>
 
 > An opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
 
