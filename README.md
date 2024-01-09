@@ -3,9 +3,16 @@
 > This is an opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
 
 > [!WARNING]
-> This action entirely replaces the Cloudflare Pages GitHub integration. You should really disable the automatic builds made by Cloudflare for the repo you are applying this action to. You can do so by following [these instructions](#disabling-the-cloudflare-pages-github-app-integration).
+> This action entirely replaces the Cloudflare Pages GitHub integration. You should [disable the automatic builds](#disabling-the-cloudflare-pages-github-app-integration) made by Cloudflare for the repository you are applying this action to.
 
 GitHub Action for creating Cloudflare Pages deployments, using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
+
+## Advantages over the official solutions
+
+- ✅ Generated build summaries
+- ✅ Deploy multiple sites from a single monorepo
+- ✅ Preview builds of PRs from forked repositories, [a known issue](https://developers.cloudflare.com/pages/platform/known-issues/#builds-and-deployment) with official solutions
+- ✅ Github Deployments on PRs from forks
 
 ## Usage
 
@@ -14,40 +21,43 @@ GitHub Action for creating Cloudflare Pages deployments, using the [Direct Uploa
 1. Add the Cloudflare account ID and API token [as secrets to your GitHub repository](#add-cloudflare-credentials-to-github-secrets).
 1. Create a `.github/workflows/publish.yml` file in your repository:
 
-   ```yml
-   on: [push]
+```yml
+on:
+  push:
+    branches:
+      - main
 
-   jobs:
-     publish:
-       runs-on: ubuntu-latest
-       permissions:
-         contents: read
-         deployments: write
-       name: Publish to Cloudflare Pages
-       steps:
-         - name: Checkout
-           uses: actions/checkout@v3
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      deployments: write
+    name: Publish to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-         # Run a build step here if your project requires
+      # Run a build step here if your project requires one
 
-         - name: Publish to Cloudflare Pages
-           uses: cloudflare/pages-action@v1
-           with:
-             apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-             accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-             projectName: YOUR_PROJECT_NAME
-             directory: YOUR_BUILD_OUTPUT_DIRECTORY
-             githubToken: ${{ secrets.GITHUB_TOKEN }}
-             # Optional: Supply a deployment name if you want to have GitHub Deployments triggered
-             deploymentName: Production
-             # Optional: Switch what branch you are publishing to.
-             # By default this will be the branch which triggered this workflow
-             branch: main
-             # Optional: Change the working directory
-             workingDirectory: my-site
-             # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
-             wranglerVersion: '3'
-   ```
+      - name: Publish to Cloudflare Pages
+        uses: AdrianGonz97/cf-pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: YOUR_PROJECT_NAME
+          directory: YOUR_BUILD_OUTPUT_DIRECTORY
+          # Optional: Supply a deployment name if you want to have GitHub Deployments triggered
+          deploymentName: Production
+          # Optional: Switch what branch you are publishing to.
+          # By default, this will be the branch which triggered this workflow
+          branch: main
+          # Optional: Change the working directory
+          workingDirectory: my-site
+          # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
+          wranglerVersion: '3'
+```
 
 1. Replace `YOUR_PROJECT_NAME` and `YOUR_BUILD_OUTPUT_DIRECTORY` with the appropriate values to your Pages project.
 
@@ -75,8 +85,8 @@ More information can be found on the [guide for making Direct Upload deployments
 
 1. Go to your project’s repository in GitHub.
 1. Under your repository’s name, select **Settings**.
-1. Select **Secrets and variables** > **Actions** > **New repository secret**
-1. Create one secret and put `CLOUDFLARE_ACCOUNT_ID` as the name with the value being your Cloudflare account ID.
+1. Select **Secrets and variables** > **Actions** > **New repository secret**.
+1. Create a secret and put `CLOUDFLARE_ACCOUNT_ID` as the name with the value being your Cloudflare account ID.
 1. Create another secret and put `CLOUDFLARE_API_TOKEN` as the name with the value being your Cloudflare API token.
 
 ### Disabling the Cloudflare Pages GitHub integration
