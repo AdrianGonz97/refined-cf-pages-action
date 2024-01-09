@@ -1,4 +1,4 @@
-name: 'Cloudflare Pages GitHub Action'
+name: 'Refined Cloudflare Pages Action'
 description: 'Publish to Cloudflare Pages with PR previews'
 inputs:
   apiToken:
