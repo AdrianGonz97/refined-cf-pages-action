@@ -1,10 +1,10 @@
 # Cloudflare Pages GitHub Action
 
-An opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
+> An opinionated fork of the official [Cloudflare Pages Action](https://github.com/cloudflare/pages-action).
 
-GitHub Action for creating Cloudflare Pages deployments, using the [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) feature with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
+A GitHub Action for creating Cloudflare Pages deployments, using [Direct Upload](https://developers.cloudflare.com/pages/platform/direct-upload/) with [Wrangler](https://developers.cloudflare.com/pages/platform/direct-upload/#wrangler-cli).
 
-## Advantages over the official solutions
+## Advantages over official solutions
 
 - ✅ Generated build summaries
 - ✅ Deploy multiple sites from a single monorepo
