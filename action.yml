@@ -1,5 +1,9 @@
 name: 'Refined Cloudflare Pages Action'
 description: 'Publish to Cloudflare Pages with PR previews'
+author: AdrianGonz97
+branding:
+  color: orange
+  icon: upload-cloud
 inputs:
   apiToken:
     description: 'Cloudflare API Token'
@@ -32,3 +36,12 @@ inputs:
 runs:
   using: 'node16'
   main: 'dist/index.js'
+outputs:
+  id:
+    description: "The ID of the pages deployment"
+  url:
+    description: "The URL of the pages deployment"
+  alias:
+    description: "The alias, if it exists, otherwise the deployment URL"
+  environment:
+    description: "The environment that was deployed to"
