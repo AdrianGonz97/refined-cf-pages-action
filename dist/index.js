@@ -22261,15 +22261,13 @@ async function createPRComment(opts) {
   if (!isPR)
     return;
   const messageId = `deployment-comment:${config.projectName}`;
+  const deploymentLogUrl = `${import_github2.context.serverUrl}/${import_github2.context.repo.owner}/${import_github2.context.repo.repo}/actions/runs/${import_github2.context.runId}`;
   const body = `<!-- ${messageId} -->
 
-### ${opts.title}
-| Name | Link |
-| :--- | :--- |
-| Latest commit | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
-| Latest deploy log | ${import_github2.context.serverUrl}/${import_github2.context.repo.owner}/${import_github2.context.repo.repo}/actions/runs/${import_github2.context.runId} |
-| Preview URL | ${opts.previewUrl} |
-| Environment | ${opts.environment} |
+### \u26A1 Cloudflare Pages Deployment
+| Name | Status | Preview | Last Commit |
+| :--- | :----- | :------ | :---------- |
+| **${config.projectName}** | ${opts.status} ([Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
 `;
   const existingComment = await findExistingComment({
     octokit: opts.octokit,
@@ -23418,9 +23416,8 @@ async function main() {
   const octokit = (0, import_github4.getOctokit)(config.githubToken);
   await createPRComment({
     octokit,
-    title: "\u26A1\uFE0F Preparing Cloudflare Pages deployment",
-    previewUrl: "\u{1F528} Building Preview",
-    environment: "..."
+    status: "\u{1F528} Building",
+    previewUrl: "\u{1F528} Building Preview"
   });
   let githubDeployment;
   if (config.deploymentName.length > 0) {
@@ -23450,9 +23447,8 @@ async function main() {
   }
   await createPRComment({
     octokit,
-    title: "\u2705 Successful Cloudflare Pages deployment",
-    previewUrl: `[Visit Preview](${alias})`,
-    environment: deployment.environment
+    status: "\u2705 Ready",
+    previewUrl: `[Visit Preview](${alias})`
   });
   (0, import_core3.setOutput)("id", deployment.id);
   (0, import_core3.setOutput)("url", deployment.url);

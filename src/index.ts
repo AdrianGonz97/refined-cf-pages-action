@@ -19,9 +19,8 @@ async function main() {
 	const octokit = getOctokit(config.githubToken);
 	await createPRComment({
 		octokit,
-		title: '⚡️ Preparing Cloudflare Pages deployment',
+		status: '🔨 Building',
 		previewUrl: '🔨 Building Preview',
-		environment: '...',
 	});
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
@@ -59,9 +58,8 @@ async function main() {
 
 	await createPRComment({
 		octokit,
-		title: '✅ Successful Cloudflare Pages deployment',
+		status: '✅ Ready',
 		previewUrl: `[Visit Preview](${alias})`,
-		environment: deployment.environment,
 	});
 
 	setOutput('id', deployment.id);
