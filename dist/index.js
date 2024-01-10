@@ -22268,7 +22268,7 @@ async function createPRComment(opts) {
 | :--- | :--- |
 | Latest commit | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
 | Latest deploy log | ${import_github2.context.serverUrl}/${import_github2.context.repo.owner}/${import_github2.context.repo.repo}/actions/runs/${import_github2.context.runId} |
-| Preview URL | ${opts.previewUrl} |
+| Preview URL | [Visit Preview](${opts.previewUrl}) |
 | Environment | ${opts.environment} |
 `;
   const existingComment = await findExistingComment({
@@ -23443,20 +23443,20 @@ async function main() {
       cfDeploymentId: pagesDeployment.id
     });
   }
-  await createPRComment({
-    octokit,
-    title: "\u2705 Successful Cloudflare Pages deployment",
-    previewUrl: pagesDeployment.url,
-    environment: pagesDeployment.environment
-  });
   await new Promise((resolve) => setTimeout(resolve, 5e3));
   const deployment = await getPagesDeployment();
-  (0, import_core3.setOutput)("id", deployment.id);
-  (0, import_core3.setOutput)("url", deployment.url);
-  (0, import_core3.setOutput)("environment", deployment.environment);
   if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
     alias = deployment.aliases[0];
   }
+  await createPRComment({
+    octokit,
+    title: "\u2705 Successful Cloudflare Pages deployment",
+    previewUrl: alias,
+    environment: deployment.environment
+  });
+  (0, import_core3.setOutput)("id", deployment.id);
+  (0, import_core3.setOutput)("url", deployment.url);
+  (0, import_core3.setOutput)("environment", deployment.environment);
   (0, import_core3.setOutput)("alias", alias);
   await createJobSummary({ deployment, aliasUrl: alias });
 }

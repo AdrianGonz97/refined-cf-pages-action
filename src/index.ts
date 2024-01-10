@@ -49,24 +49,25 @@ async function main() {
 		});
 	}
 
-	await createPRComment({
-		octokit,
-		title: '✅ Successful Cloudflare Pages deployment',
-		previewUrl: pagesDeployment.url,
-		environment: pagesDeployment.environment,
-	});
-
 	// we sleep to give CF enough time to update their deployment status
 	await new Promise((resolve) => setTimeout(resolve, 5000));
 	const deployment = await getPagesDeployment();
+
+	if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
+		alias = deployment.aliases[0]!; // we can assert that idx 0 exists
+	}
+
+	await createPRComment({
+		octokit,
+		title: '✅ Successful Cloudflare Pages deployment',
+		previewUrl: alias,
+		environment: deployment.environment,
+	});
 
 	setOutput('id', deployment.id);
 	setOutput('url', deployment.url);
 	setOutput('environment', deployment.environment);
 
-	if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
-		alias = deployment.aliases[0]!; // we can assert that idx 0 exists
-	}
 	setOutput('alias', alias);
 	await createJobSummary({ deployment, aliasUrl: alias });
 }
