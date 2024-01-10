@@ -19,9 +19,8 @@ async function main() {
 	const octokit = getOctokit(config.githubToken);
 	await createPRComment({
 		octokit,
-		title: '⚡️ Preparing Cloudflare Pages deployment',
-		previewUrl: '🔨 Building Preview',
-		environment: '...',
+		status: '🔨 Building',
+		previewUrl: '...',
 	});
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
@@ -34,17 +33,9 @@ async function main() {
 	}
 
 	const pagesDeployment = await createPagesDeployment(productionEnvironment);
-	setOutput('id', pagesDeployment.id);
-	setOutput('url', pagesDeployment.url);
-	setOutput('environment', pagesDeployment.environment);
-
 	let alias = pagesDeployment.url;
-	if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
-		alias = pagesDeployment.aliases[0]!; // we can assert that idx 0 exists
-	}
-	setOutput('alias', alias);
 
-	await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+	await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
 
 	if (githubDeployment) {
 		await createGithubDeploymentStatus({
@@ -57,16 +48,25 @@ async function main() {
 		});
 	}
 
-	await createPRComment({
-		octokit,
-		title: '✅ Successful Cloudflare Pages deployment',
-		previewUrl: pagesDeployment.url,
-		environment: pagesDeployment.environment,
-	});
-
 	// we sleep to give CF enough time to update their deployment status
 	await new Promise((resolve) => setTimeout(resolve, 5000));
 	const deployment = await getPagesDeployment();
+
+	if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
+		alias = deployment.aliases[0]!; // we can assert that idx 0 exists
+	}
+
+	await createPRComment({
+		octokit,
+		status: '✅ Ready',
+		previewUrl: `[Visit Preview](${alias})`,
+	});
+
+	setOutput('id', deployment.id);
+	setOutput('url', deployment.url);
+	setOutput('environment', deployment.environment);
+
+	setOutput('alias', alias);
 	await createJobSummary({ deployment, aliasUrl: alias });
 }
 

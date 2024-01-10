@@ -42,27 +42,24 @@ export async function findExistingComment(opts: FindExistingCommentOpts) {
 
 type CreatePRCommentOpts = {
 	octokit: Octokit;
-	title: string;
 	previewUrl: string;
-	environment: string;
+	status: string;
 };
 
 export async function createPRComment(opts: CreatePRCommentOpts) {
 	if (!isPR) return;
 
 	const messageId = `deployment-comment:${config.projectName}`;
+	const deploymentLogUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
 
 	const body = `<!-- ${messageId} -->
 
-### ${opts.title}
-| Name | Link |
-| :--- | :--- |
-| Latest commit | ${context.payload.pull_request?.head.sha || context.ref} |
-| Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${
-		context.repo.repo
-	}/actions/runs/${context.runId} |
-| Preview URL | ${opts.previewUrl} |
-| Environment | ${opts.environment} |
+### ⚡ Cloudflare Pages Deployment
+| Name | Status | Preview | Last Commit |
+| :--- | :----- | :------ | :---------- |
+| **${config.projectName}** | ${opts.status} ([View Log](${deploymentLogUrl})) | ${
+		opts.previewUrl
+	} | ${context.payload.pull_request?.head.sha || context.ref} |
 `;
 
 	const existingComment = await findExistingComment({

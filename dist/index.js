@@ -22261,15 +22261,13 @@ async function createPRComment(opts) {
   if (!isPR)
     return;
   const messageId = `deployment-comment:${config.projectName}`;
+  const deploymentLogUrl = `${import_github2.context.serverUrl}/${import_github2.context.repo.owner}/${import_github2.context.repo.repo}/actions/runs/${import_github2.context.runId}`;
   const body = `<!-- ${messageId} -->
 
-### ${opts.title}
-| Name | Link |
-| :--- | :--- |
-| Latest commit | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
-| Latest deploy log | ${import_github2.context.serverUrl}/${import_github2.context.repo.owner}/${import_github2.context.repo.repo}/actions/runs/${import_github2.context.runId} |
-| Preview URL | ${opts.previewUrl} |
-| Environment | ${opts.environment} |
+### \u26A1 Cloudflare Pages Deployment
+| Name | Status | Preview | Last Commit |
+| :--- | :----- | :------ | :---------- |
+| **${config.projectName}** | ${opts.status} ([View Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
 `;
   const existingComment = await findExistingComment({
     octokit: opts.octokit,
@@ -23418,9 +23416,8 @@ async function main() {
   const octokit = (0, import_github4.getOctokit)(config.githubToken);
   await createPRComment({
     octokit,
-    title: "\u26A1\uFE0F Preparing Cloudflare Pages deployment",
-    previewUrl: "\u{1F528} Building Preview",
-    environment: "..."
+    status: "\u{1F528} Building",
+    previewUrl: "..."
   });
   let githubDeployment;
   if (config.deploymentName.length > 0) {
@@ -23431,15 +23428,8 @@ async function main() {
     });
   }
   const pagesDeployment = await createPagesDeployment(productionEnvironment);
-  (0, import_core3.setOutput)("id", pagesDeployment.id);
-  (0, import_core3.setOutput)("url", pagesDeployment.url);
-  (0, import_core3.setOutput)("environment", pagesDeployment.environment);
   let alias = pagesDeployment.url;
-  if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
-    alias = pagesDeployment.aliases[0];
-  }
-  (0, import_core3.setOutput)("alias", alias);
-  await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+  await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
   if (githubDeployment) {
     await createGithubDeploymentStatus({
       octokit,
@@ -23450,14 +23440,20 @@ async function main() {
       cfDeploymentId: pagesDeployment.id
     });
   }
-  await createPRComment({
-    octokit,
-    title: "\u2705 Successful Cloudflare Pages deployment",
-    previewUrl: pagesDeployment.url,
-    environment: pagesDeployment.environment
-  });
   await new Promise((resolve) => setTimeout(resolve, 5e3));
   const deployment = await getPagesDeployment();
+  if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
+    alias = deployment.aliases[0];
+  }
+  await createPRComment({
+    octokit,
+    status: "\u2705 Ready",
+    previewUrl: `[Visit Preview](${alias})`
+  });
+  (0, import_core3.setOutput)("id", deployment.id);
+  (0, import_core3.setOutput)("url", deployment.url);
+  (0, import_core3.setOutput)("environment", deployment.environment);
+  (0, import_core3.setOutput)("alias", alias);
   await createJobSummary({ deployment, aliasUrl: alias });
 }
 try {

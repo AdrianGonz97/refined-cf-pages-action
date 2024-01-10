@@ -38,10 +38,10 @@ runs:
   main: 'dist/index.js'
 outputs:
   id:
-    description: "The ID of the pages deployment"
+    description: 'The ID of the pages deployment'
   url:
-    description: "The URL of the pages deployment"
+    description: 'The URL of the pages deployment'
   alias:
-    description: "The alias, if it exists, otherwise the deployment URL"
+    description: 'The alias, if it exists, otherwise the deployment URL'
   environment:
-    description: "The environment that was deployed to"
+    description: 'The environment that was deployed to'
