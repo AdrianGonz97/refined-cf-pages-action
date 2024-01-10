@@ -61,7 +61,7 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 | Latest deploy log | ${context.serverUrl}/${context.repo.owner}/${
 		context.repo.repo
 	}/actions/runs/${context.runId} |
-| Preview URL | [Visit Preview](${opts.previewUrl}) |
+| Preview URL | ${opts.previewUrl} |
 | Environment | ${opts.environment} |
 `;
 

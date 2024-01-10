@@ -60,7 +60,7 @@ async function main() {
 	await createPRComment({
 		octokit,
 		title: '✅ Successful Cloudflare Pages deployment',
-		previewUrl: alias,
+		previewUrl: `[Visit Preview](${alias})`,
 		environment: deployment.environment,
 	});
 
