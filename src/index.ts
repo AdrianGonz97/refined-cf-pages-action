@@ -34,17 +34,9 @@ async function main() {
 	}
 
 	const pagesDeployment = await createPagesDeployment(productionEnvironment);
-	setOutput('id', pagesDeployment.id);
-	setOutput('url', pagesDeployment.url);
-	setOutput('environment', pagesDeployment.environment);
-
 	let alias = pagesDeployment.url;
-	if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
-		alias = pagesDeployment.aliases[0]!; // we can assert that idx 0 exists
-	}
-	setOutput('alias', alias);
 
-	await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+	await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
 
 	if (githubDeployment) {
 		await createGithubDeploymentStatus({
@@ -67,6 +59,15 @@ async function main() {
 	// we sleep to give CF enough time to update their deployment status
 	await new Promise((resolve) => setTimeout(resolve, 5000));
 	const deployment = await getPagesDeployment();
+
+	setOutput('id', deployment.id);
+	setOutput('url', deployment.url);
+	setOutput('environment', deployment.environment);
+
+	if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
+		alias = deployment.aliases[0]!; // we can assert that idx 0 exists
+	}
+	setOutput('alias', alias);
 	await createJobSummary({ deployment, aliasUrl: alias });
 }
 

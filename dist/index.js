@@ -23431,15 +23431,8 @@ async function main() {
     });
   }
   const pagesDeployment = await createPagesDeployment(productionEnvironment);
-  (0, import_core3.setOutput)("id", pagesDeployment.id);
-  (0, import_core3.setOutput)("url", pagesDeployment.url);
-  (0, import_core3.setOutput)("environment", pagesDeployment.environment);
   let alias = pagesDeployment.url;
-  if (!productionEnvironment && pagesDeployment.aliases && pagesDeployment.aliases.length > 0) {
-    alias = pagesDeployment.aliases[0];
-  }
-  (0, import_core3.setOutput)("alias", alias);
-  await createJobSummary({ deployment: pagesDeployment, aliasUrl: alias });
+  await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
   if (githubDeployment) {
     await createGithubDeploymentStatus({
       octokit,
@@ -23458,6 +23451,13 @@ async function main() {
   });
   await new Promise((resolve) => setTimeout(resolve, 5e3));
   const deployment = await getPagesDeployment();
+  (0, import_core3.setOutput)("id", deployment.id);
+  (0, import_core3.setOutput)("url", deployment.url);
+  (0, import_core3.setOutput)("environment", deployment.environment);
+  if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
+    alias = deployment.aliases[0];
+  }
+  (0, import_core3.setOutput)("alias", alias);
   await createJobSummary({ deployment, aliasUrl: alias });
 }
 try {
