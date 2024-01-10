@@ -22267,7 +22267,7 @@ async function createPRComment(opts) {
 ### \u26A1 Cloudflare Pages Deployment
 | Name | Status | Preview | Last Commit |
 | :--- | :----- | :------ | :---------- |
-| **${config.projectName}** | ${opts.status} ([Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
+| **${config.projectName}** | ${opts.status} ([View Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
 `;
   const existingComment = await findExistingComment({
     octokit: opts.octokit,
@@ -23417,7 +23417,7 @@ async function main() {
   await createPRComment({
     octokit,
     status: "\u{1F528} Building",
-    previewUrl: "\u{1F528} Building Preview"
+    previewUrl: "..."
   });
   let githubDeployment;
   if (config.deploymentName.length > 0) {

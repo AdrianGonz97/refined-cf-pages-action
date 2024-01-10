@@ -20,7 +20,7 @@ async function main() {
 	await createPRComment({
 		octokit,
 		status: '🔨 Building',
-		previewUrl: '🔨 Building Preview',
+		previewUrl: '...',
 	});
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;

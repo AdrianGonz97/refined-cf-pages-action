@@ -57,9 +57,9 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 ### ⚡ Cloudflare Pages Deployment
 | Name | Status | Preview | Last Commit |
 | :--- | :----- | :------ | :---------- |
-| **${config.projectName}** | ${opts.status} ([Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${
-		context.payload.pull_request?.head.sha || context.ref
-	} |
+| **${config.projectName}** | ${opts.status} ([View Log](${deploymentLogUrl})) | ${
+		opts.previewUrl
+	} | ${context.payload.pull_request?.head.sha || context.ref} |
 `;
 
 	const existingComment = await findExistingComment({
