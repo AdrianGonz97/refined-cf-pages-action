@@ -23416,12 +23416,12 @@ async function getPagesDeployment() {
 
 // src/index.ts
 async function main() {
-  const project = await getPagesProject();
-  const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
   await createPRComment({
     status: "building",
     previewUrl: ""
   });
+  const project = await getPagesProject();
+  const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({

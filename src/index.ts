@@ -10,15 +10,15 @@ import {
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
 
 async function main() {
-	const project = await getPagesProject();
-
-	const productionEnvironment =
-		githubBranch === project.production_branch || config.branch === project.production_branch;
-
 	await createPRComment({
 		status: 'building',
 		previewUrl: '',
 	});
+
+	const project = await getPagesProject();
+
+	const productionEnvironment =
+		githubBranch === project.production_branch || config.branch === project.production_branch;
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
