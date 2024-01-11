@@ -10,7 +10,6 @@ import {
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
 
 async function main() {
-	throw new Error('test');
 	const project = await getPagesProject();
 
 	const productionEnvironment =
@@ -66,15 +65,17 @@ async function main() {
 }
 
 try {
+	throw new Error('test');
 	main();
 } catch (error) {
 	(async () => {
+		console.log('running');
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
 		});
 
-		await new Promise((resolve) => setTimeout(resolve, 5000));
+		await new Promise((resolve) => setTimeout(resolve, 10000));
 
 		// @ts-expect-error always print the message
 		setFailed(error.message);
