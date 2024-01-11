@@ -66,7 +66,7 @@ async function main() {
 }
 
 try {
-	main();
+	(async () => await main())();
 } catch (error) {
 	(async () => {
 		await createPRComment({

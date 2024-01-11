@@ -23458,7 +23458,7 @@ async function main() {
   await createJobSummary({ deployment, aliasUrl: alias });
 }
 try {
-  main();
+  (async () => await main())();
 } catch (error) {
   (async () => {
     await createPRComment({
