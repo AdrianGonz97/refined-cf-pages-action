@@ -23466,7 +23466,6 @@ try {
       status: "fail",
       previewUrl: ""
     });
-    await new Promise((resolve) => setTimeout(resolve, 1e4));
     (0, import_core3.setFailed)(error.message);
   })();
 }

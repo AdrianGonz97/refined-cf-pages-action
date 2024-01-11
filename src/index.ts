@@ -75,7 +75,7 @@ try {
 			previewUrl: '',
 		});
 
-		await new Promise((resolve) => setTimeout(resolve, 10000));
+		// await new Promise((resolve) => setTimeout(resolve, 10000));
 
 		// @ts-expect-error always print the message
 		setFailed(error.message);
