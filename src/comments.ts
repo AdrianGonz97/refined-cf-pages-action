@@ -1,10 +1,8 @@
 import { context } from '@actions/github';
 import { isPR } from './globals.js';
 import { config } from './config.js';
-import type { Octokit } from './types.js';
 
 type FindExistingCommentOpts = {
-	octokit: Octokit;
 	owner: string;
 	repo: string;
 	issueNumber: number;
@@ -19,10 +17,10 @@ export async function findExistingComment(opts: FindExistingCommentOpts) {
 		per_page: 100,
 	};
 
-	const listComments = opts.octokit.rest.issues.listComments;
+	const listComments = config.octokit.rest.issues.listComments;
 	let found: Awaited<ReturnType<typeof listComments>>['data'][number] | undefined;
 
-	for await (const comments of opts.octokit.paginate.iterator(listComments, params)) {
+	for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
 		found = comments.data.find(({ body }) => {
 			return (body?.search(opts.messageId) ?? -1) > -1;
 		});
@@ -40,12 +38,16 @@ export async function findExistingComment(opts: FindExistingCommentOpts) {
 	return;
 }
 
-type CreatePRCommentOpts = {
-	octokit: Octokit;
-	previewUrl: string;
-	status: string;
-};
+const Status = {
+	success: '✅ Ready',
+	fail: '❌ Failed',
+	building: '🔨 Building',
+} as const;
 
+type CreatePRCommentOpts = {
+	previewUrl: string;
+	status: keyof typeof Status;
+};
 export async function createPRComment(opts: CreatePRCommentOpts) {
 	if (!isPR) return;
 
@@ -57,13 +59,12 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 ### ⚡ Cloudflare Pages Deployment
 | Name | Status | Preview | Last Commit |
 | :--- | :----- | :------ | :---------- |
-| **${config.projectName}** | ${opts.status} ([View Log](${deploymentLogUrl})) | ${
+| **${config.projectName}** | ${Status[opts.status]} ([View Log](${deploymentLogUrl})) | ${
 		opts.previewUrl
 	} | ${context.payload.pull_request?.head.sha || context.ref} |
 `;
 
 	const existingComment = await findExistingComment({
-		octokit: opts.octokit,
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		issueNumber: context.issue.number,
@@ -71,7 +72,7 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 	});
 
 	if (existingComment !== undefined) {
-		return await opts.octokit.rest.issues.updateComment({
+		return await config.octokit.rest.issues.updateComment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			issue_number: context.issue.number,
@@ -80,7 +81,7 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 		});
 	}
 
-	return await opts.octokit.rest.issues.createComment({
+	return await config.octokit.rest.issues.createComment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		issue_number: context.issue.number,
