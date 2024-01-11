@@ -23416,6 +23416,7 @@ async function getPagesDeployment() {
 
 // src/index.ts
 async function main() {
+  throw new Error("test");
   const project = await getPagesProject();
   const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
   await createPRComment({

@@ -10,6 +10,7 @@ import {
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
 
 async function main() {
+	throw new Error('test');
 	const project = await getPagesProject();
 
 	const productionEnvironment =
