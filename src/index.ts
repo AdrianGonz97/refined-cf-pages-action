@@ -65,10 +65,10 @@ async function main() {
 	await createJobSummary({ deployment, aliasUrl: alias });
 }
 
-try {
-	(async () => await main())();
-} catch (error) {
-	(async () => {
+(async () => {
+	try {
+		await main();
+	} catch (error) {
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
@@ -76,5 +76,5 @@ try {
 
 		// @ts-expect-error always print the message
 		setFailed(error.message);
-	})();
-}
+	}
+})();

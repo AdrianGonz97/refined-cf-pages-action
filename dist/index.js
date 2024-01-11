@@ -23457,17 +23457,17 @@ async function main() {
   (0, import_core3.setOutput)("alias", alias);
   await createJobSummary({ deployment, aliasUrl: alias });
 }
-try {
-  (async () => await main())();
-} catch (error) {
-  (async () => {
+(async () => {
+  try {
+    await main();
+  } catch (error) {
     await createPRComment({
       status: "fail",
       previewUrl: ""
     });
     (0, import_core3.setFailed)(error.message);
-  })();
-}
+  }
+})();
 /*! Bundled license information:
 
 is-plain-object/dist/is-plain-object.mjs:
