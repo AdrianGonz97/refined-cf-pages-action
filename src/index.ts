@@ -69,12 +69,12 @@ async function main() {
 	try {
 		await main();
 	} catch (error) {
+		// @ts-expect-error always print the message
+		setFailed(error.message);
+
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
 		});
-
-		// @ts-expect-error always print the message
-		setFailed(error.message);
 	}
 })();

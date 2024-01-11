@@ -23461,11 +23461,11 @@ async function main() {
   try {
     await main();
   } catch (error) {
+    (0, import_core3.setFailed)(error.message);
     await createPRComment({
       status: "fail",
       previewUrl: ""
     });
-    (0, import_core3.setFailed)(error.message);
   }
 })();
 /*! Bundled license information:
