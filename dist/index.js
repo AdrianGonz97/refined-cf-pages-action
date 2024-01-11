@@ -23461,11 +23461,11 @@ try {
   main();
 } catch (error) {
   (async () => {
-    await new Promise((resolve) => setTimeout(resolve, 5e3));
     await createPRComment({
       status: "fail",
       previewUrl: ""
     });
+    await new Promise((resolve) => setTimeout(resolve, 5e3));
     (0, import_core3.setFailed)(error.message);
   })();
 }

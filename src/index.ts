@@ -69,11 +69,12 @@ try {
 	main();
 } catch (error) {
 	(async () => {
-		await new Promise((resolve) => setTimeout(resolve, 5000));
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
 		});
+
+		await new Promise((resolve) => setTimeout(resolve, 5000));
 
 		// @ts-expect-error always print the message
 		setFailed(error.message);
