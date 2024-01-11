@@ -69,6 +69,7 @@ try {
 	main();
 } catch (error) {
 	(async () => {
+		await new Promise((resolve) => setTimeout(resolve, 5000));
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
