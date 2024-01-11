@@ -1,13 +1,16 @@
 import { getInput, setFailed } from '@actions/core';
+import { getOctokit } from '@actions/github';
 
 function loadConfig() {
 	try {
+		const githubToken = getInput('githubToken', { required: true });
 		return {
+			githubToken,
+			octokit: getOctokit(githubToken),
 			apiToken: getInput('apiToken', { required: true }),
 			accountId: getInput('accountId', { required: true }),
 			projectName: getInput('projectName', { required: true }),
 			directory: getInput('directory', { required: true }),
-			githubToken: getInput('githubToken', { required: false }),
 			branch: getInput('branch', { required: false }),
 			deploymentName: getInput('deploymentName', { required: false }),
 			workingDirectory: getInput('workingDirectory', { required: false }),

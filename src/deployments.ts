@@ -2,19 +2,16 @@ import { context } from '@actions/github';
 import { summary } from '@actions/core';
 import { config } from './config.js';
 import type { Deployment } from '@cloudflare/types';
-import type { Octokit } from './types.js';
 
 type CreateGHDeploymentOpts = {
-	octokit: Octokit;
 	productionEnvironment: boolean;
 	environment: string;
 };
 export async function createGithubDeployment({
-	octokit,
 	productionEnvironment,
 	environment,
 }: CreateGHDeploymentOpts) {
-	const deployment = await octokit.rest.repos.createDeployment({
+	const deployment = await config.octokit.rest.repos.createDeployment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		ref: context.payload.pull_request?.head.sha || context.ref,
@@ -31,7 +28,6 @@ export async function createGithubDeployment({
 }
 
 type CreateGHDeploymentStatusOpts = {
-	octokit: Octokit;
 	deploymentId: number;
 	environmentUrl: string;
 	cfDeploymentId: string;
@@ -40,7 +36,7 @@ type CreateGHDeploymentStatusOpts = {
 };
 
 export async function createGithubDeploymentStatus(opts: CreateGHDeploymentStatusOpts) {
-	return opts.octokit.rest.repos.createDeploymentStatus({
+	return config.octokit.rest.repos.createDeploymentStatus({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		deployment_id: opts.deploymentId,

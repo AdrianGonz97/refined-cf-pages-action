@@ -1,5 +1,4 @@
 import { setOutput, setFailed } from '@actions/core';
-import { getOctokit } from '@actions/github';
 import { config } from './config.js';
 import { createPRComment } from './comments.js';
 import { githubBranch } from './globals.js';
@@ -16,17 +15,14 @@ async function main() {
 	const productionEnvironment =
 		githubBranch === project.production_branch || config.branch === project.production_branch;
 
-	const octokit = getOctokit(config.githubToken);
 	await createPRComment({
-		octokit,
-		status: '🔨 Building',
-		previewUrl: '...',
+		status: 'building',
+		previewUrl: '',
 	});
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
 		githubDeployment = await createGithubDeployment({
-			octokit,
 			productionEnvironment,
 			environment: config.deploymentName,
 		});
@@ -39,7 +35,6 @@ async function main() {
 
 	if (githubDeployment) {
 		await createGithubDeploymentStatus({
-			octokit,
 			productionEnvironment,
 			environmentName: githubDeployment.environment,
 			deploymentId: githubDeployment.id,
@@ -57,8 +52,7 @@ async function main() {
 	}
 
 	await createPRComment({
-		octokit,
-		status: '✅ Ready',
+		status: 'success',
 		previewUrl: `[Visit Preview](${alias})`,
 	});
 
@@ -75,4 +69,9 @@ try {
 } catch (error) {
 	// @ts-expect-error always print the message
 	setFailed(error.message);
+
+	createPRComment({
+		status: 'fail',
+		previewUrl: '',
+	});
 }

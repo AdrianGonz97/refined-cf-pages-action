@@ -22199,18 +22199,20 @@ var require_undici = __commonJS({
 
 // src/index.ts
 var import_core3 = __toESM(require_core());
-var import_github4 = __toESM(require_github());
 
 // src/config.ts
 var import_core = __toESM(require_core());
+var import_github = __toESM(require_github());
 function loadConfig() {
   try {
+    const githubToken = (0, import_core.getInput)("githubToken", { required: true });
     return {
+      githubToken,
+      octokit: (0, import_github.getOctokit)(githubToken),
       apiToken: (0, import_core.getInput)("apiToken", { required: true }),
       accountId: (0, import_core.getInput)("accountId", { required: true }),
       projectName: (0, import_core.getInput)("projectName", { required: true }),
       directory: (0, import_core.getInput)("directory", { required: true }),
-      githubToken: (0, import_core.getInput)("githubToken", { required: false }),
       branch: (0, import_core.getInput)("branch", { required: false }),
       deploymentName: (0, import_core.getInput)("deploymentName", { required: false }),
       workingDirectory: (0, import_core.getInput)("workingDirectory", { required: false }),
@@ -22224,14 +22226,14 @@ function loadConfig() {
 var config = loadConfig();
 
 // src/comments.ts
-var import_github2 = __toESM(require_github());
+var import_github3 = __toESM(require_github());
 
 // src/globals.ts
-var import_github = __toESM(require_github());
+var import_github2 = __toESM(require_github());
 var import_process = require("process");
 var githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
-var prBranchOwner = import_github.context.payload.pull_request?.head.repo.owner.login;
-var isPR = import_github.context.eventName === "pull_request" || import_github.context.eventName === "pull_request_target";
+var prBranchOwner = import_github2.context.payload.pull_request?.head.repo.owner.login;
+var isPR = import_github2.context.eventName === "pull_request" || import_github2.context.eventName === "pull_request_target";
 
 // src/comments.ts
 async function findExistingComment(opts) {
@@ -22241,9 +22243,9 @@ async function findExistingComment(opts) {
     issue_number: opts.issueNumber,
     per_page: 100
   };
-  const listComments = opts.octokit.rest.issues.listComments;
+  const listComments = config.octokit.rest.issues.listComments;
   let found;
-  for await (const comments of opts.octokit.paginate.iterator(listComments, params)) {
+  for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
     found = comments.data.find(({ body }) => {
       return (body?.search(opts.messageId) ?? -1) > -1;
     });
@@ -22257,54 +22259,57 @@ async function findExistingComment(opts) {
   }
   return;
 }
+var Status = {
+  success: "\u2705 Ready",
+  fail: "\u274C Failed",
+  building: "\u{1F528} Building"
+};
 async function createPRComment(opts) {
   if (!isPR)
     return;
   const messageId = `deployment-comment:${config.projectName}`;
-  const deploymentLogUrl = `${import_github2.context.serverUrl}/${import_github2.context.repo.owner}/${import_github2.context.repo.repo}/actions/runs/${import_github2.context.runId}`;
+  const deploymentLogUrl = `${import_github3.context.serverUrl}/${import_github3.context.repo.owner}/${import_github3.context.repo.repo}/actions/runs/${import_github3.context.runId}`;
   const body = `<!-- ${messageId} -->
 
 ### \u26A1 Cloudflare Pages Deployment
 | Name | Status | Preview | Last Commit |
 | :--- | :----- | :------ | :---------- |
-| **${config.projectName}** | ${opts.status} ([View Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github2.context.payload.pull_request?.head.sha || import_github2.context.ref} |
+| **${config.projectName}** | ${Status[opts.status]} ([View Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |
 `;
   const existingComment = await findExistingComment({
-    octokit: opts.octokit,
-    owner: import_github2.context.repo.owner,
-    repo: import_github2.context.repo.repo,
-    issueNumber: import_github2.context.issue.number,
+    owner: import_github3.context.repo.owner,
+    repo: import_github3.context.repo.repo,
+    issueNumber: import_github3.context.issue.number,
     messageId
   });
   if (existingComment !== void 0) {
-    return await opts.octokit.rest.issues.updateComment({
-      owner: import_github2.context.repo.owner,
-      repo: import_github2.context.repo.repo,
-      issue_number: import_github2.context.issue.number,
+    return await config.octokit.rest.issues.updateComment({
+      owner: import_github3.context.repo.owner,
+      repo: import_github3.context.repo.repo,
+      issue_number: import_github3.context.issue.number,
       comment_id: existingComment.id,
       body
     });
   }
-  return await opts.octokit.rest.issues.createComment({
-    owner: import_github2.context.repo.owner,
-    repo: import_github2.context.repo.repo,
-    issue_number: import_github2.context.issue.number,
+  return await config.octokit.rest.issues.createComment({
+    owner: import_github3.context.repo.owner,
+    repo: import_github3.context.repo.repo,
+    issue_number: import_github3.context.issue.number,
     body
   });
 }
 
 // src/deployments.ts
-var import_github3 = __toESM(require_github());
+var import_github4 = __toESM(require_github());
 var import_core2 = __toESM(require_core());
 async function createGithubDeployment({
-  octokit,
   productionEnvironment,
   environment
 }) {
-  const deployment = await octokit.rest.repos.createDeployment({
-    owner: import_github3.context.repo.owner,
-    repo: import_github3.context.repo.repo,
-    ref: import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref,
+  const deployment = await config.octokit.rest.repos.createDeployment({
+    owner: import_github4.context.repo.owner,
+    repo: import_github4.context.repo.repo,
+    ref: import_github4.context.payload.pull_request?.head.sha || import_github4.context.ref,
     auto_merge: false,
     description: "Cloudflare Pages",
     required_contexts: [],
@@ -22316,9 +22321,9 @@ async function createGithubDeployment({
   }
 }
 async function createGithubDeploymentStatus(opts) {
-  return opts.octokit.rest.repos.createDeploymentStatus({
-    owner: import_github3.context.repo.owner,
-    repo: import_github3.context.repo.repo,
+  return config.octokit.rest.repos.createDeploymentStatus({
+    owner: import_github4.context.repo.owner,
+    repo: import_github4.context.repo.repo,
     deployment_id: opts.deploymentId,
     // @ts-expect-error this should accept a string
     environment: opts.environmentName,
@@ -23413,16 +23418,13 @@ async function getPagesDeployment() {
 async function main() {
   const project = await getPagesProject();
   const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
-  const octokit = (0, import_github4.getOctokit)(config.githubToken);
   await createPRComment({
-    octokit,
-    status: "\u{1F528} Building",
-    previewUrl: "..."
+    status: "building",
+    previewUrl: ""
   });
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({
-      octokit,
       productionEnvironment,
       environment: config.deploymentName
     });
@@ -23432,7 +23434,6 @@ async function main() {
   await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
   if (githubDeployment) {
     await createGithubDeploymentStatus({
-      octokit,
       productionEnvironment,
       environmentName: githubDeployment.environment,
       deploymentId: githubDeployment.id,
@@ -23446,8 +23447,7 @@ async function main() {
     alias = deployment.aliases[0];
   }
   await createPRComment({
-    octokit,
-    status: "\u2705 Ready",
+    status: "success",
     previewUrl: `[Visit Preview](${alias})`
   });
   (0, import_core3.setOutput)("id", deployment.id);
@@ -23460,6 +23460,10 @@ try {
   main();
 } catch (error) {
   (0, import_core3.setFailed)(error.message);
+  createPRComment({
+    status: "fail",
+    previewUrl: ""
+  });
 }
 /*! Bundled license information:
 
