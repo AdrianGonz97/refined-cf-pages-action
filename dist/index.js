@@ -22267,7 +22267,7 @@ var Status = {
 async function createPRComment(opts) {
   if (!isPR)
     return;
-  const messageId = `deployment-comment:${config.projectName}`;
+  const messageId = `refined-cf-pages-action:deployment-summary:${import_github3.context.repo.repo}`;
   const deploymentLogUrl = `${import_github3.context.serverUrl}/${import_github3.context.repo.owner}/${import_github3.context.repo.repo}/actions/runs/${import_github3.context.runId}`;
   const body = `<!-- ${messageId} -->
 
