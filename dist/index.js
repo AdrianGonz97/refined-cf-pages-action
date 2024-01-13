@@ -22275,6 +22275,7 @@ async function createPRComment(opts) {
     issueNumber: import_github3.context.issue.number,
     messageId
   });
+  console.log(existingComment?.body);
   if (existingComment === void 0 || existingComment.body === void 0) {
     return await config.octokit.rest.issues.createComment({
       owner: import_github3.context.repo.owner,

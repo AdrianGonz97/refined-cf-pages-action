@@ -61,6 +61,8 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 		messageId,
 	});
 
+	console.log(existingComment?.body);
+
 	if (existingComment === undefined || existingComment.body === undefined) {
 		return await config.octokit.rest.issues.createComment({
 			owner: context.repo.owner,
