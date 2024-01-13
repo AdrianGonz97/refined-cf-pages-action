@@ -22246,9 +22246,7 @@ async function findExistingComment(opts) {
   const listComments = config.octokit.rest.issues.listComments;
   let found;
   for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
-    found = comments.data.find(({ body }) => {
-      return body?.includes(`<!-- ${opts.messageId} -->`);
-    });
+    found = comments.data.find(({ body }) => body?.includes(`<!-- ${opts.messageId} -->`));
     if (found) {
       break;
     }
@@ -22300,7 +22298,12 @@ async function createPRComment(opts) {
   });
 }
 function hasRow(content) {
-  return content.includes(`| **${config.projectName}** |`);
+  const lines = content.split("\n");
+  for (const line of lines) {
+    if (line.includes(`| **${config.projectName}** |`))
+      return true;
+  }
+  return false;
 }
 function replaceRow(body, row) {
   const lines = body.split("\n").map((line) => {

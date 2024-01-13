@@ -21,9 +21,7 @@ export async function findExistingComment(opts: FindExistingCommentOpts) {
 	let found: Awaited<ReturnType<typeof listComments>>['data'][number] | undefined;
 
 	for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
-		found = comments.data.find(({ body }) => {
-			return body?.includes(`<!-- ${opts.messageId} -->`);
-		});
+		found = comments.data.find(({ body }) => body?.includes(`<!-- ${opts.messageId} -->`));
 
 		if (found) {
 			break;
@@ -89,7 +87,11 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 }
 
 function hasRow(content: string) {
-	return content.includes(`| **${config.projectName}** |`);
+	const lines = content.split('\n');
+	for (const line of lines) {
+		if (line.includes(`| **${config.projectName}** |`)) return true;
+	}
+	return false;
 }
 
 function replaceRow(body: string, row: string): string {
