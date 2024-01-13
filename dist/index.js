@@ -22323,7 +22323,8 @@ function createRow(opts) {
 function createComment(messageId, row) {
   return `<!-- ${messageId} -->
 
-### \u26A1 Cloudflare Pages Deployment
+###### built with [Refined Cloudflare Pages Action](https://github.com/AdrianGonz97/refined-cf-pages-action)
+## \u26A1 Cloudflare Pages Deployment
 | Name | Status | Preview | Last Commit |
 | :--- | :----- | :------ | :---------- |
 ${row}

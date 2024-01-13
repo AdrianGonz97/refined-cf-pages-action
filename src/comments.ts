@@ -123,7 +123,8 @@ function createRow(opts: CreateRowOpts): string {
 function createComment(messageId: string, row: string): string {
 	return `<!-- ${messageId} -->
 
-### ⚡ Cloudflare Pages Deployment
+###### built with [Refined Cloudflare Pages Action](https://github.com/AdrianGonz97/refined-cf-pages-action)
+## ⚡ Cloudflare Pages Deployment
 | Name | Status | Preview | Last Commit |
 | :--- | :----- | :------ | :---------- |
 ${row}
