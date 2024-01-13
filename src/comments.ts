@@ -115,8 +115,7 @@ type CreateRowOpts = {
 function createRow(opts: CreateRowOpts): string {
 	return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${
 		opts.previewUrl
-	} | ${context.payload.pull_request?.head.sha || context.ref} |
-`;
+	} | ${context.payload.pull_request?.head.sha || context.ref} |`;
 }
 
 function createComment(messageId: string, row: string): string {

@@ -22315,8 +22315,7 @@ function appendRow(body, row) {
   return body.trim() + row;
 }
 function createRow(opts) {
-  return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |
-`;
+  return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |`;
 }
 function createComment(messageId, row) {
   return `<!-- ${messageId} -->
