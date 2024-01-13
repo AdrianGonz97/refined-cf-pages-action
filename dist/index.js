@@ -22316,7 +22316,7 @@ function replaceRow(body, row) {
   return lines.join("\n");
 }
 function appendRow(body, row) {
-  return body.trim() + row;
+  return body.trim() + "\n" + row;
 }
 function createRow(opts) {
   return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |`;

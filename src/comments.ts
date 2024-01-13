@@ -108,7 +108,7 @@ function replaceRow(body: string, row: string): string {
 }
 
 function appendRow(body: string, row: string): string {
-	return body.trim() + row;
+	return body.trim() + '\n' + row;
 }
 
 type CreateRowOpts = {
