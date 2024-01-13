@@ -22246,9 +22246,7 @@ async function findExistingComment(opts) {
   const listComments = config.octokit.rest.issues.listComments;
   let found;
   for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
-    found = comments.data.find(({ body }) => {
-      return (body?.search(opts.messageId) ?? -1) > -1;
-    });
+    found = comments.data.find(({ body }) => body?.includes(`<!-- ${opts.messageId} -->`));
     if (found) {
       break;
     }
@@ -22267,36 +22265,70 @@ var Status = {
 async function createPRComment(opts) {
   if (!isPR)
     return;
-  const messageId = `deployment-comment:${config.projectName}`;
+  const messageId = `refined-cf-pages-action:deployment-summary:${import_github3.context.repo.repo}`;
   const deploymentLogUrl = `${import_github3.context.serverUrl}/${import_github3.context.repo.owner}/${import_github3.context.repo.repo}/actions/runs/${import_github3.context.runId}`;
-  const body = `<!-- ${messageId} -->
-
-### \u26A1 Cloudflare Pages Deployment
-| Name | Status | Preview | Last Commit |
-| :--- | :----- | :------ | :---------- |
-| **${config.projectName}** | ${Status[opts.status]} ([View Log](${deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |
-`;
+  const status = Status[opts.status];
+  const row = createRow({ previewUrl: opts.previewUrl, status, deploymentLogUrl });
   const existingComment = await findExistingComment({
     owner: import_github3.context.repo.owner,
     repo: import_github3.context.repo.repo,
     issueNumber: import_github3.context.issue.number,
     messageId
   });
-  if (existingComment !== void 0) {
-    return await config.octokit.rest.issues.updateComment({
+  if (existingComment === void 0 || existingComment.body === void 0) {
+    return await config.octokit.rest.issues.createComment({
       owner: import_github3.context.repo.owner,
       repo: import_github3.context.repo.repo,
       issue_number: import_github3.context.issue.number,
-      comment_id: existingComment.id,
-      body
+      body: createComment(messageId, row)
     });
   }
-  return await config.octokit.rest.issues.createComment({
+  let updatedBody;
+  if (hasRow(existingComment.body)) {
+    updatedBody = replaceRow(existingComment.body, row);
+  } else {
+    updatedBody = appendRow(existingComment.body, row);
+  }
+  return await config.octokit.rest.issues.updateComment({
     owner: import_github3.context.repo.owner,
     repo: import_github3.context.repo.repo,
     issue_number: import_github3.context.issue.number,
-    body
+    comment_id: existingComment.id,
+    body: updatedBody
   });
+}
+function hasRow(content) {
+  const lines = content.split("\n");
+  for (const line of lines) {
+    if (line.includes(`| **${config.projectName}** |`))
+      return true;
+  }
+  return false;
+}
+function replaceRow(body, row) {
+  const lines = body.split("\n").map((line) => {
+    const isProjectRow = hasRow(line);
+    if (!isProjectRow)
+      return line;
+    return row;
+  });
+  return lines.join("\n");
+}
+function appendRow(body, row) {
+  return body.trim() + "\n" + row;
+}
+function createRow(opts) {
+  return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |`;
+}
+function createComment(messageId, row) {
+  return `<!-- ${messageId} -->
+
+###### built with [Refined Cloudflare Pages Action](https://github.com/AdrianGonz97/refined-cf-pages-action)
+## \u26A1 Cloudflare Pages Deployment
+| Name | Status | Preview | Last Commit |
+| :--- | :----- | :------ | :---------- |
+${row}
+`;
 }
 
 // src/deployments.ts
