@@ -51,18 +51,10 @@ type CreatePRCommentOpts = {
 export async function createPRComment(opts: CreatePRCommentOpts) {
 	if (!isPR) return;
 
-	const messageId = `deployment-comment:${config.projectName}`;
+	const messageId = `refined-cf-pages-action:deployment-summary:${context.repo.repo}`;
 	const deploymentLogUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
-
-	const body = `<!-- ${messageId} -->
-
-### ⚡ Cloudflare Pages Deployment
-| Name | Status | Preview | Last Commit |
-| :--- | :----- | :------ | :---------- |
-| **${config.projectName}** | ${Status[opts.status]} ([View Log](${deploymentLogUrl})) | ${
-		opts.previewUrl
-	} | ${context.payload.pull_request?.head.sha || context.ref} |
-`;
+	const status = Status[opts.status];
+	const row = createRow({ previewUrl: opts.previewUrl, status, deploymentLogUrl });
 
 	const existingComment = await findExistingComment({
 		owner: context.repo.owner,
@@ -71,20 +63,68 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 		messageId,
 	});
 
-	if (existingComment !== undefined) {
-		return await config.octokit.rest.issues.updateComment({
+	if (existingComment === undefined || existingComment.body === undefined) {
+		return await config.octokit.rest.issues.createComment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
 			issue_number: context.issue.number,
-			comment_id: existingComment.id,
-			body,
+			body: createComment(messageId, row),
 		});
 	}
 
-	return await config.octokit.rest.issues.createComment({
+	let updatedBody: string;
+	if (hasRow(existingComment.body)) {
+		updatedBody = replaceRow(existingComment.body, row);
+	} else {
+		updatedBody = appendRow(existingComment.body, row);
+	}
+
+	return await config.octokit.rest.issues.updateComment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		issue_number: context.issue.number,
-		body,
+		comment_id: existingComment.id,
+		body: updatedBody,
 	});
+}
+
+function hasRow(content: string) {
+	return content.includes(`| **${config.projectName}** |`);
+}
+
+function replaceRow(body: string, row: string): string {
+	const lines = body.split('\n').map((line) => {
+		const isProjectRow = hasRow(line);
+		if (!isProjectRow) return line;
+
+		return row;
+	});
+
+	return lines.join('\n');
+}
+
+function appendRow(body: string, row: string): string {
+	return body.trimEnd() + '\n' + row;
+}
+
+type CreateRowOpts = {
+	previewUrl: string;
+	deploymentLogUrl: string;
+	status: string;
+};
+function createRow(opts: CreateRowOpts): string {
+	return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${
+		opts.previewUrl
+	} | ${context.payload.pull_request?.head.sha || context.ref} |
+`;
+}
+
+function createComment(messageId: string, row: string): string {
+	return `<!-- ${messageId} -->
+
+### ⚡ Cloudflare Pages Deployment
+| Name | Status | Preview | Last Commit |
+| :--- | :----- | :------ | :---------- |
+${row}
+`;
 }
