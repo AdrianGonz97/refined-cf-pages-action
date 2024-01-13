@@ -22,7 +22,7 @@ export async function findExistingComment(opts: FindExistingCommentOpts) {
 
 	for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
 		found = comments.data.find(({ body }) => {
-			return body?.split('\n').at(0) === `<!-- ${opts.messageId} -->`;
+			return body?.includes(`<!-- ${opts.messageId} -->`);
 		});
 
 		if (found) {
