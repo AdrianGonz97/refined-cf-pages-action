@@ -20,9 +20,9 @@ A GitHub Action for creating Cloudflare Pages deployments, using [Direct Upload]
 > This action entirely replaces the Cloudflare Pages GitHub integration. Before continuing, you should [disable the automatic builds](#disabling-the-cloudflare-pages-github-integration) made by Cloudflare for the repository you are applying this action to.
 
 1. [Locate your Cloudflare account ID](#get-account-id).
-1. [Generate an API token](#generate-an-api-token).
-1. Add the Cloudflare account ID and API token [as secrets to your GitHub repository](#add-cloudflare-credentials-to-github-secrets).
-1. Create a `.github/workflows/publish.yml` file in your repository:
+2. [Generate an API token](#generate-an-api-token).
+3. Add the Cloudflare account ID and API token [as secrets to your GitHub repository](#add-cloudflare-credentials-to-github-secrets).
+4. Create a `.github/workflows/publish.yml` file in your repository:
 
 ```yml
 on:
@@ -62,7 +62,12 @@ jobs:
           wranglerVersion: '3'
 ```
 
-1. Replace `YOUR_PROJECT_NAME` and `YOUR_BUILD_OUTPUT_DIRECTORY` with the appropriate values to your Pages project.
+5. Replace `YOUR_PROJECT_NAME` and `YOUR_BUILD_OUTPUT_DIRECTORY` with the appropriate values to your Pages project.
+
+And you're ready to go!
+
+> [!TIP]
+> Be sure to check out the [_Enabling PR Previews from Forks_](#enabling-pr-previews-from-forks) section if you're interested in enabling this particular feature.
 
 ### Get account ID
 
