@@ -15,7 +15,7 @@ inputs:
     description: 'The name of the Pages project to upload to'
     required: true
   directory:
-    description: 'The directory of static assets to upload'
+    description: 'The build directory to upload'
     required: true
   githubToken:
     description: 'GitHub Token'
@@ -34,7 +34,7 @@ inputs:
     required: false
     default: '3'
 runs:
-  using: 'node16'
+  using: 'node20'
   main: 'dist/index.js'
 outputs:
   id:
