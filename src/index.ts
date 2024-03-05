@@ -59,8 +59,8 @@ async function main() {
 	setOutput('id', deployment.id);
 	setOutput('url', deployment.url);
 	setOutput('environment', deployment.environment);
-
 	setOutput('alias', alias);
+
 	await createJobSummary({ deployment, aliasUrl: alias });
 }
 
