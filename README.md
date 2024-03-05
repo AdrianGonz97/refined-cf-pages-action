@@ -103,7 +103,7 @@ If you have already connected your repository to the [Cloudflare Pages GitHub in
 
 Enabling PR previews from forks requires the use of the [`pull_request_target`](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target) event in the workflow, which has security concerns around exposing secrets that need to be considered before implementing it into your project.
 
-If your site _does not_ use/have any secrets during **the build step** or in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [Formsnap](https://github.com/svecosystem/formsnap) and can be found in this [workflow file](https://github.com/svecosystem/formsnap/blob/main/.github/workflows/docs-preview.yml).
+If your site _does not_ use/have any secrets during **the build step** or in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [Formsnap](https://github.com/svecosystem/formsnap) and its implementation can be found in this [workflow file](https://github.com/svecosystem/formsnap/blob/main/.github/workflows/docs-preview.yml).
 
 Here's a simplified example:
 
