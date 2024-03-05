@@ -144,9 +144,9 @@ jobs:
 </p>
 </details>
 
-If your project _does use secrets_, then the deployment job can be fitted with an `environment` field that requires manual approval before each deployment (like it does in the [Melt UI workflow](https://github.com/melt-ui/melt-ui/blob/develop/.github/workflows/preview.yml)).
+If your project _does use secrets_, then the deployment job can be fitted with an `environment` field that requires manual approval before each deployment (like it does in this [Melt UI workflow](https://github.com/melt-ui/melt-ui/blob/develop/.github/workflows/preview.yml)).
 
-Manual approval using [environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) needs to be setup at the repo level, as described in [this Melt UI PR](https://github.com/melt-ui/melt-ui/pull/899) under the _"Make the `Preview` environment protected"_ step.
+Manual approval using [environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) needs to be setup at the repo level, as described in this [Melt UI PR](https://github.com/melt-ui/melt-ui/pull/899) under the _"Make the `Preview` environment protected"_ step.
 
 <details><summary>Example: Preview Deployment <b>WITH SECRETS</b></summary>
 <p>
