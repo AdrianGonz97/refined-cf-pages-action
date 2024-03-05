@@ -105,9 +105,7 @@ Enabling PR previews from forks requires the use of the [`pull_request_target`](
 
 If your site _does not_ use/have any secrets during **the build step** or in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [Formsnap](https://github.com/svecosystem/formsnap) and its implementation can be found in this [workflow file](https://github.com/svecosystem/formsnap/blob/main/.github/workflows/docs-preview.yml).
 
-Here's a simplified example:
-
-<details><summary>Preview Deployment with <b>NO SECRETS</b></summary>
+<details><summary>Example: Preview Deployment with <b>NO SECRETS</b></summary>
 <p>
 
 ```yaml
@@ -150,7 +148,7 @@ If your project _does use secrets_, then the deployment job can be fitted with a
 
 Manual approval needs to be setup at the repo level, as described in this PR under the _"Make the `Preview` environment protected"_ step: https://github.com/melt-ui/melt-ui/pull/899
 
-<details><summary>Preview Deployment <b>WITH SECRETS</b></summary>
+<details><summary>Example: Preview Deployment <b>WITH SECRETS</b></summary>
 <p>
 
 ```yaml
