@@ -99,6 +99,101 @@ If you have already connected your repository to the [Cloudflare Pages GitHub in
 1. Select **GitHub Apps**, and next to Cloudflare Pages, select **Configure**
 1. Under **Repository access**, select **Only select repositories**, and remove your repository.
 
+### Enabling PR Previews from Forks
+
+Enabling PR previews from forks requires the use of the [`pull_request_target`](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target) event in the workflow, which has security concerns around exposing secrets that need to be considered before implementing it into your project.
+
+If your site _does not_ use/have any secrets during **the build step** or in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [Formsnap](https://github.com/svecosystem/formsnap) and can be found in this [workflow file](https://github.com/svecosystem/formsnap/blob/main/.github/workflows/docs-preview.yml).
+
+Here's a simplified example:
+
+<details><summary>Preview Deployment with <b>NO SECRETS</b></summary>
+<p>
+
+```yaml
+name: Preview Deployment
+on:
+  pull_request_target:
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    name: Deploy Preview to Cloudflare Pages
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      # Run your install/build steps here
+
+      - name: Deploy to Cloudflare Pages
+        uses: AdrianGonz97/refined-cf-pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: YOUR_PROJECT_NAME
+          directory: YOUR_BUILD_OUTPUT_DIRECTORY
+          deploymentName: Preview
+```
+
+</p>
+</details>
+
+If your project _does use secrets_, then the deployment job can be fitted with an `environment` field that requires manual approval before each deployment (like it does in the [Melt UI workflow](https://github.com/melt-ui/melt-ui/blob/develop/.github/workflows/preview.yml)).
+
+Manual approval needs to be setup at the repo level, as described in this PR under the "Make the `Preview` environment protected" step: https://github.com/melt-ui/melt-ui/pull/899
+
+<details><summary>Preview Deployment <b>WITH SECRETS</b></summary>
+<p>
+
+```yaml
+name: Preview Deployment
+on:
+  pull_request_target:
+
+jobs:
+  deploy-preview:
+    environment: Preview # Requires manual approval before each deployment!
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      deployments: write
+    name: Deploy Preview to Cloudflare Pages
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.ref }}
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+
+      # Run your install/build steps here
+
+      - name: Build site
+        run: pnpm build
+        env:
+          SOME_SECRET: 'foo' # Uses some secret during build!
+
+      - name: Deploy to Cloudflare Pages
+        uses: AdrianGonz97/refined-cf-pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: YOUR_PROJECT_NAME
+          directory: YOUR_BUILD_OUTPUT_DIRECTORY
+          deploymentName: Preview
+```
+
+</p>
+</details>
+
 ### Specifying a branch
 
 The branch name is used by Cloudflare Pages to determine if the deployment is production or preview. Read more about
