@@ -158,7 +158,7 @@ on:
 
 jobs:
   deploy-preview:
-    environment: Preview # Requires manual approval before each deployment!
+    environment: Preview # The name of the environment that requires manual approval before each deployment
     runs-on: ubuntu-latest
     permissions:
       contents: read
