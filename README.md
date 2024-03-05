@@ -99,7 +99,7 @@ If you have already connected your repository to the [Cloudflare Pages GitHub in
 1. Select **GitHub Apps**, and next to Cloudflare Pages, select **Configure**
 1. Under **Repository access**, select **Only select repositories**, and remove your repository.
 
-### Enabling PR Previews for Forks
+### Enabling PR Previews from Forks
 
 Enabling PR previews from forks requires the use of the [`pull_request_target`](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target) event in the workflow, which has security concerns around exposing secrets that need to be considered before implementing it into your project.
 
