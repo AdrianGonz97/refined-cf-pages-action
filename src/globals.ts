@@ -1,7 +1,7 @@
 import { context } from '@actions/github';
 import { env } from 'process';
 
-export const githubBranch: string | undefined = env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME;
+export const githubBranch: string = env.GITHUB_HEAD_REF || (env.GITHUB_REF_NAME as string);
 
 export const prBranchOwner: string | undefined =
 	context.payload.pull_request?.head.repo.owner.login;
