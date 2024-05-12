@@ -12,6 +12,7 @@ function loadConfig() {
 			projectName: getInput('projectName', { required: true }),
 			directory: getInput('directory', { required: true }),
 			branch: getInput('branch', { required: false }),
+			branchName: getInput('branchName', { required: false }),
 			deploymentName: getInput('deploymentName', { required: false }),
 			workingDirectory: getInput('workingDirectory', { required: false }),
 			wranglerVersion: getInput('wranglerVersion', { required: false }),

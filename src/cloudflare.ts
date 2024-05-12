@@ -28,19 +28,24 @@ export async function getPagesProject() {
 }
 
 export async function createPagesDeployment(isProd: boolean) {
-	const branchName = isProd ? config.branch : `${prBranchOwner}-${config.branch || githubBranch}`;
+	const branchName =
+		config.branchName ??
+		(isProd
+			? config.branch
+			: `${prBranchOwner}-${config.branch || githubBranch}`)
 	// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 	await shellac.in(path.join(process.cwd(), config.workingDirectory))`
-$ export CLOUDFLARE_API_TOKEN="${config.apiToken}"
-if ${config.accountId} {
-  $ export CLOUDFLARE_ACCOUNT_ID="${config.accountId}"
+  $ export CLOUDFLARE_API_TOKEN="${config.apiToken}"
+  if ${config.accountId} {
+	$ export CLOUDFLARE_ACCOUNT_ID="${config.accountId}"
+  }
+  
+  $$ npx wrangler@${config.wranglerVersion} pages deploy "${config.directory}" --project-name="${config.projectName}" --branch="${branchName}"
+  `
+
+	return getPagesDeployment()
 }
 
-$$ npx wrangler@${config.wranglerVersion} pages deploy "${config.directory}" --project-name="${config.projectName}" --branch="${branchName}"
-`;
-
-	return getPagesDeployment();
-}
 
 export async function getPagesDeployment() {
 	const response = await fetch(

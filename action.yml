@@ -23,6 +23,9 @@ inputs:
   branch:
     description: 'The name of the branch you want to deploy to'
     required: false
+  branchName:
+    description: 'The name of Branch Preview URL'
+    required: false
   deploymentName:
     description: 'The name of the GitHub deployment'
     required: false
