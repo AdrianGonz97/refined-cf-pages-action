@@ -28,7 +28,9 @@ export async function getPagesProject() {
 }
 
 export async function createPagesDeployment(isProd: boolean) {
-	const branchName = isProd ? config.branch : `${prBranchOwner}-${config.branch || githubBranch}`;
+	const branch = config.branch || githubBranch;
+	const branchName = isProd || prBranchOwner === undefined ? branch : `${prBranchOwner}-${branch}`;
+
 	// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 	await shellac.in(path.join(process.cwd(), config.workingDirectory))`
 $ export CLOUDFLARE_API_TOKEN="${config.apiToken}"

@@ -26517,7 +26517,8 @@ async function getPagesProject() {
   return result;
 }
 async function createPagesDeployment(isProd) {
-  const branchName = isProd ? config.branch : `${prBranchOwner}-${config.branch || githubBranch}`;
+  const branch = config.branch || githubBranch;
+  const branchName = isProd || prBranchOwner === void 0 ? branch : `${prBranchOwner}-${branch}`;
   await src_default.in(import_node_path.default.join(process.cwd(), config.workingDirectory))`
 $ export CLOUDFLARE_API_TOKEN="${config.apiToken}"
 if ${config.accountId} {
