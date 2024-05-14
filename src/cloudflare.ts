@@ -29,7 +29,8 @@ export async function getPagesProject() {
 
 export async function createPagesDeployment(isProd: boolean) {
 	const branch = config.branch || githubBranch;
-	const branchName = isProd || prBranchOwner === undefined ? branch : `${prBranchOwner}-${branch}`;
+	const branchName =
+		isProd || config.branch || prBranchOwner === undefined ? branch : `${prBranchOwner}-${branch}`;
 
 	// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 	await shellac.in(path.join(process.cwd(), config.workingDirectory))`
