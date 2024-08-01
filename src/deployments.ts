@@ -40,7 +40,6 @@ export async function createGithubDeploymentStatus(opts: CreateGHDeploymentStatu
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		deployment_id: opts.deploymentId,
-		// @ts-expect-error this should accept a string
 		environment: opts.environmentName,
 		environment_url: opts.environmentUrl,
 		production_environment: opts.productionEnvironment,

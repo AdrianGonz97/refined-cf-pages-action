@@ -23069,7 +23069,8 @@ function loadConfig() {
       branch: (0, import_core.getInput)("branch", { required: false }),
       deploymentName: (0, import_core.getInput)("deploymentName", { required: false }),
       workingDirectory: (0, import_core.getInput)("workingDirectory", { required: false }),
-      wranglerVersion: (0, import_core.getInput)("wranglerVersion", { required: false })
+      wranglerVersion: (0, import_core.getInput)("wranglerVersion", { required: false }),
+      runId: (0, import_core.getInput)("runId", { required: false })
     };
   } catch (error) {
     (0, import_core.setFailed)(error.message);
@@ -23115,8 +23116,15 @@ var Status = {
   building: "\u{1F528} Building"
 };
 async function createPRComment(opts) {
-  if (!isPR)
+  if (!isPR && !isWorkflowRun)
     return;
+  if (isWorkflowRun) {
+    const run = await config.octokit.rest.actions.getWorkflowRun({
+      owner: import_github3.context.repo.owner,
+      repo: import_github3.context.repo.repo,
+      run_id: +config.runId
+    });
+  }
   const messageId = `refined-cf-pages-action:deployment-summary:${import_github3.context.repo.repo}`;
   const deploymentLogUrl = `${import_github3.context.serverUrl}/${import_github3.context.repo.owner}/${import_github3.context.repo.repo}/actions/runs/${import_github3.context.runId}`;
   const status = Status[opts.status];
@@ -23209,7 +23217,6 @@ async function createGithubDeploymentStatus(opts) {
     owner: import_github4.context.repo.owner,
     repo: import_github4.context.repo.repo,
     deployment_id: opts.deploymentId,
-    // @ts-expect-error this should accept a string
     environment: opts.environmentName,
     environment_url: opts.environmentUrl,
     production_environment: opts.productionEnvironment,
