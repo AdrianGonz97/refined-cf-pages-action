@@ -24318,7 +24318,7 @@ async function main() {
   pr = workflowRun?.data.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
-  const sha = pr?.head.sha ?? import_github5.context.ref;
+  const sha = pr?.head.sha ?? import_github5.context.sha;
   const branch = config.branch || (pr?.head.ref ?? import_github5.context.ref);
   await createPRComment({
     status: "building",

@@ -32,7 +32,7 @@ async function main() {
 	pr = workflowRun?.data.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
-	const sha = pr?.head.sha ?? context.ref;
+	const sha = pr?.head.sha ?? context.sha;
 	const branch = config.branch || (pr?.head.ref ?? context.ref);
 
 	await createPRComment({
