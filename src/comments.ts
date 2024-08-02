@@ -43,6 +43,7 @@ type CreatePRCommentOpts = {
 	status: keyof typeof Status;
 	issueNumber: number;
 	runId: number;
+	sha: string;
 };
 export async function createPRComment(opts: CreatePRCommentOpts) {
 	if (!isPR && !isWorkflowRun) return;
@@ -50,7 +51,7 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 	const messageId = `refined-cf-pages-action:deployment-summary:${context.repo.repo}`;
 	const deploymentLogUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${opts.runId}`;
 	const status = Status[opts.status];
-	const row = createRow({ previewUrl: opts.previewUrl, status, deploymentLogUrl });
+	const row = createRow({ previewUrl: opts.previewUrl, sha: opts.sha, status, deploymentLogUrl });
 
 	const existingComment = await findExistingComment({
 		owner: context.repo.owner,
@@ -111,11 +112,10 @@ type CreateRowOpts = {
 	previewUrl: string;
 	deploymentLogUrl: string;
 	status: string;
+	sha: string;
 };
 function createRow(opts: CreateRowOpts): string {
-	return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${
-		opts.previewUrl
-	} | ${context.payload.pull_request?.head.sha || context.ref} |`;
+	return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${opts.sha} |`;
 }
 
 function createComment(messageId: string, row: string): string {

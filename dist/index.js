@@ -23122,7 +23122,7 @@ async function createPRComment(opts) {
   const messageId = `refined-cf-pages-action:deployment-summary:${import_github3.context.repo.repo}`;
   const deploymentLogUrl = `${import_github3.context.serverUrl}/${import_github3.context.repo.owner}/${import_github3.context.repo.repo}/actions/runs/${opts.runId}`;
   const status = Status[opts.status];
-  const row = createRow({ previewUrl: opts.previewUrl, status, deploymentLogUrl });
+  const row = createRow({ previewUrl: opts.previewUrl, sha: opts.sha, status, deploymentLogUrl });
   const existingComment = await findExistingComment({
     owner: import_github3.context.repo.owner,
     repo: import_github3.context.repo.repo,
@@ -23172,7 +23172,7 @@ function appendRow(body, row) {
   return body.trim() + "\n" + row;
 }
 function createRow(opts) {
-  return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${import_github3.context.payload.pull_request?.head.sha || import_github3.context.ref} |`;
+  return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${opts.sha} |`;
 }
 function createComment(messageId, row) {
   return `<!-- ${messageId} -->
@@ -24312,22 +24312,21 @@ async function getPagesDeployment() {
 }
 
 // src/index.ts
+var pr;
 async function main() {
-  const workflowRun = isWorkflowRun && config.runId ? await config.octokit.rest.actions.getWorkflowRun({
+  const workflowRun = config.runId ? await config.octokit.rest.actions.getWorkflowRun({
     owner: import_github5.context.repo.owner,
     repo: import_github5.context.repo.repo,
     run_id: config.runId
   }) : void 0;
-  const pr = workflowRun?.data.pull_requests?.[0];
-  console.dir(
-    { workflow: workflowRun?.data },
-    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-  );
+  pr = workflowRun?.data.pull_requests?.[0];
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
+  const sha = pr?.head.sha ?? import_github5.context.ref;
   await createPRComment({
     status: "building",
     previewUrl: "",
+    sha,
     issueNumber,
     runId
   });
@@ -24361,6 +24360,7 @@ async function main() {
   await createPRComment({
     status: "success",
     previewUrl: `[Visit Preview](${alias})`,
+    sha,
     issueNumber,
     runId
   });
@@ -24378,7 +24378,8 @@ async function main() {
     await createPRComment({
       status: "fail",
       previewUrl: "",
-      issueNumber: import_github5.context.issue.number,
+      sha: pr?.head.sha ?? import_github5.context.ref,
+      issueNumber: pr?.number ?? import_github5.context.issue.number,
       runId: config.runId ?? import_github5.context.runId
     });
   }

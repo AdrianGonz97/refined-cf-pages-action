@@ -2,7 +2,7 @@ import { context } from '@actions/github';
 import { setOutput, setFailed } from '@actions/core';
 import { config } from './config.js';
 import { createPRComment } from './comments.js';
-import { githubBranch, isWorkflowRun } from './globals.js';
+import { githubBranch } from './globals.js';
 import {
 	createGithubDeployment,
 	createGithubDeploymentStatus,
@@ -10,27 +10,31 @@ import {
 } from './deployments.js';
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
 
-async function main() {
-	const workflowRun =
-		isWorkflowRun && config.runId
-			? await config.octokit.rest.actions.getWorkflowRun({
-					owner: context.repo.owner,
-					repo: context.repo.repo,
-					run_id: config.runId,
-				})
-			: undefined;
+type Unwrap<T> = T extends Array<infer U> ? U : T;
+type PullRequest = Unwrap<
+	Awaited<ReturnType<typeof config.octokit.rest.actions.getWorkflowRun>>['data']['pull_requests']
+>;
 
-	const pr = workflowRun?.data.pull_requests?.[0];
-	console.dir(
-		{ workflow: workflowRun?.data },
-		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-	);
+let pr: PullRequest | undefined;
+
+async function main() {
+	const workflowRun = config.runId
+		? await config.octokit.rest.actions.getWorkflowRun({
+				owner: context.repo.owner,
+				repo: context.repo.repo,
+				run_id: config.runId,
+			})
+		: undefined;
+
+	pr = workflowRun?.data.pull_requests?.[0];
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
+	const sha = pr?.head.sha ?? context.ref;
 
 	await createPRComment({
 		status: 'building',
 		previewUrl: '',
+		sha,
 		issueNumber,
 		runId,
 	});
@@ -75,6 +79,7 @@ async function main() {
 	await createPRComment({
 		status: 'success',
 		previewUrl: `[Visit Preview](${alias})`,
+		sha,
 		issueNumber,
 		runId,
 	});
@@ -97,7 +102,8 @@ async function main() {
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
-			issueNumber: undefined ?? context.issue.number,
+			sha: pr?.head.sha ?? context.ref,
+			issueNumber: pr?.number ?? context.issue.number,
 			runId: config.runId ?? context.runId,
 		});
 	}
