@@ -24318,6 +24318,10 @@ async function main() {
     repo: import_github5.context.repo.repo,
     run_id: config.runId
   }) : void 0;
+  console.dir(
+    { pr: import_github5.context.payload.pull_request },
+    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+  );
   pr = workflowRun?.data.pull_requests?.[0];
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;

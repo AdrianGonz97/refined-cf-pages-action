@@ -29,6 +29,10 @@ async function main() {
 			})
 		: undefined;
 	// context.payload.pull_request
+	console.dir(
+		{ pr: context.payload.pull_request },
+		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+	);
 
 	pr = workflowRun?.data.pull_requests?.[0];
 	const issueNumber = pr?.number ?? context.issue.number;
