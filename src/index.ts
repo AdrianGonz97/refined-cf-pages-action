@@ -17,6 +17,10 @@ type PullRequest = Unwrap<
 let pr: PullRequest | undefined;
 
 async function main() {
+	if (context.eventName === 'pull_request_target') {
+		throw new Error('Executing in an unsafe environment. See: XXX');
+	}
+
 	const workflowRun = config.runId
 		? await config.octokit.rest.actions.getWorkflowRun({
 				owner: context.repo.owner,

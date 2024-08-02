@@ -23085,7 +23085,7 @@ var import_github3 = __toESM(require_github());
 
 // src/globals.ts
 var import_github2 = __toESM(require_github());
-var isPR = import_github2.context.eventName === "pull_request" || import_github2.context.eventName === "pull_request_target";
+var isPR = import_github2.context.eventName === "pull_request";
 var isWorkflowRun = import_github2.context.eventName === "workflow_run";
 
 // src/comments.ts
@@ -24310,6 +24310,9 @@ async function getPagesDeployment() {
 // src/index.ts
 var pr;
 async function main() {
+  if (import_github5.context.eventName === "pull_request_target") {
+    throw new Error("Executing in an unsafe environment. See: XXX");
+  }
   const workflowRun = config.runId ? await config.octokit.rest.actions.getWorkflowRun({
     owner: import_github5.context.repo.owner,
     repo: import_github5.context.repo.repo,
