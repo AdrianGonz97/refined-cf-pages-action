@@ -25,7 +25,7 @@ async function main() {
 		{ workflow: workflowRun?.data },
 		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
 	);
-	const issueNumber = pr?.id ?? context.issue.number;
+	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 
 	await createPRComment({

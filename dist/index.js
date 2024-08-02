@@ -24323,7 +24323,7 @@ async function main() {
     { workflow: workflowRun?.data },
     { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
   );
-  const issueNumber = pr?.id ?? import_github5.context.issue.number;
+  const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   await createPRComment({
     status: "building",
