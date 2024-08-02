@@ -23086,7 +23086,7 @@ var import_github3 = __toESM(require_github());
 // src/globals.ts
 var import_github2 = __toESM(require_github());
 var isPR = import_github2.context.eventName === "pull_request" || import_github2.context.eventName === "pull_request_target";
-var isWorkflowRun = import_github2.context.eventName === "workflow_run";
+var isWorkflowRun = import_github2.context.eventName === "workflow_run" && Boolean(config.runId);
 
 // src/comments.ts
 async function findExistingComment(opts) {
