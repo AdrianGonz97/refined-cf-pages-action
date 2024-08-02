@@ -1,7 +1,8 @@
+import { context } from '@actions/github';
 import { setOutput, setFailed } from '@actions/core';
 import { config } from './config.js';
 import { createPRComment } from './comments.js';
-import { githubBranch } from './globals.js';
+import { githubBranch, isWorkflowRun } from './globals.js';
 import {
 	createGithubDeployment,
 	createGithubDeploymentStatus,
@@ -10,9 +11,24 @@ import {
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
 
 async function main() {
+	const workflowRun =
+		isWorkflowRun && config.runId
+			? await config.octokit.rest.actions.getWorkflowRun({
+					owner: context.repo.owner,
+					repo: context.repo.repo,
+					run_id: config.runId,
+				})
+			: undefined;
+
+	const pr = workflowRun?.data.pull_requests?.[0];
+	const issueNumber = pr?.id ?? context.issue.number;
+	const runId = config.runId ?? context.runId;
+
 	await createPRComment({
 		status: 'building',
 		previewUrl: '',
+		issueNumber,
+		runId,
 	});
 
 	const project = await getPagesProject();
@@ -25,6 +41,7 @@ async function main() {
 		githubDeployment = await createGithubDeployment({
 			productionEnvironment,
 			environment: config.deploymentName,
+			ref: pr?.head.ref ?? context.ref,
 		});
 	}
 
@@ -54,6 +71,8 @@ async function main() {
 	await createPRComment({
 		status: 'success',
 		previewUrl: `[Visit Preview](${alias})`,
+		issueNumber,
+		runId,
 	});
 
 	setOutput('id', deployment.id);
@@ -74,6 +93,8 @@ async function main() {
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
+			issueNumber: undefined ?? context.issue.number,
+			runId: config.runId ?? context.runId,
 		});
 	}
 })();

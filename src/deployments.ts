@@ -6,18 +6,20 @@ import type { Deployment } from '@cloudflare/types';
 type CreateGHDeploymentOpts = {
 	productionEnvironment: boolean;
 	environment: string;
+	ref: string;
 };
 export async function createGithubDeployment({
 	productionEnvironment,
 	environment,
+	ref,
 }: CreateGHDeploymentOpts) {
 	const deployment = await config.octokit.rest.repos.createDeployment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
-		ref: context.payload.pull_request?.head.sha || context.ref,
 		auto_merge: false,
 		description: 'Cloudflare Pages',
 		required_contexts: [],
+		ref,
 		environment,
 		production_environment: productionEnvironment,
 	});

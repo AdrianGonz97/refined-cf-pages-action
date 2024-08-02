@@ -33,6 +33,9 @@ inputs:
     description: 'The version of Wrangler to use'
     required: false
     default: '3'
+  runId:
+    description: 'The id of the workflow run where the build was uploaded from. Only for in `workflow_run` events'
+    required: false
 runs:
   using: 'node20'
   main: 'dist/index.js'
