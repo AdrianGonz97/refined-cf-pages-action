@@ -24287,7 +24287,7 @@ if ${config.accountId} {
   $ export CLOUDFLARE_ACCOUNT_ID="${config.accountId}"
 }
 
-$$ npx wrangler@${config.wranglerVersion} pages deploy "${config.directory}" --project-name="${config.projectName}" --branch="${branchName}"
+$$ npx wrangler${config.wranglerVersion ? `@${config.wranglerVersion}` : ""} pages deploy "${config.directory}" --project-name="${config.projectName}" --branch="${branchName}"
 `;
   return getPagesDeployment();
 }
