@@ -23085,8 +23085,6 @@ var import_github3 = __toESM(require_github());
 
 // src/globals.ts
 var import_github2 = __toESM(require_github());
-var import_process = require("process");
-var githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
 var isPR = import_github2.context.eventName === "pull_request" || import_github2.context.eventName === "pull_request_target";
 var isWorkflowRun = import_github2.context.eventName === "workflow_run";
 
@@ -23306,12 +23304,12 @@ var __publicField2 = (obj, key, value) => {
 var Shell = class {
   constructor(env_passthrough = ["PATH"]) {
     __publicField(this, "process");
-    const env2 = { PS1: "" };
+    const env = { PS1: "" };
     env_passthrough.forEach((key) => {
-      env2[key] = process.env[key];
+      env[key] = process.env[key];
     });
     this.process = import_child_process.default.spawn("bash", ["--noprofile", "--norc"], {
-      env: env2,
+      env,
       detached: true
     });
     this.process.stdout.setEncoding("utf8");
@@ -24282,8 +24280,7 @@ async function getPagesProject() {
   return result;
 }
 async function createPagesDeployment(opts) {
-  const branch = config.branch || githubBranch;
-  const branchName = config.branch || opts.isProd && isPR === false ? branch : `${opts.branchOwner}-${branch}`;
+  const branchName = config.branch || opts.isProd && isPR === false ? opts.branch : `${opts.branchOwner}-${opts.branch}`;
   await src_default.in(import_node_path.default.join(process.cwd(), config.workingDirectory))`
 $ export CLOUDFLARE_API_TOKEN="${config.apiToken}"
 if ${config.accountId} {
@@ -24322,6 +24319,7 @@ async function main() {
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.ref;
+  const branch = config.branch || (pr?.head.ref ?? import_github5.context.payload.pull_request?.head.ref ?? import_github5.context.ref);
   await createPRComment({
     status: "building",
     previewUrl: "",
@@ -24330,7 +24328,7 @@ async function main() {
     runId
   });
   const project = await getPagesProject();
-  const productionEnvironment = githubBranch === project.production_branch || config.branch === project.production_branch;
+  const productionEnvironment = branch === project.production_branch;
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({
@@ -24341,7 +24339,8 @@ async function main() {
   }
   const pagesDeployment = await createPagesDeployment({
     isProd: productionEnvironment,
-    branchOwner: import_github5.context.payload.pull_request?.head.repo.owner.login ?? workflowRun?.data.triggering_actor?.login
+    branchOwner: import_github5.context.payload.pull_request?.head.repo.owner.login ?? workflowRun?.data.triggering_actor?.login,
+    branch
   });
   let alias = pagesDeployment.url;
   await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });

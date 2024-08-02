@@ -2,7 +2,6 @@ import { context } from '@actions/github';
 import { setOutput, setFailed } from '@actions/core';
 import { config } from './config.js';
 import { createPRComment } from './comments.js';
-import { githubBranch } from './globals.js';
 import {
 	createGithubDeployment,
 	createGithubDeploymentStatus,
@@ -25,11 +24,14 @@ async function main() {
 				run_id: config.runId,
 			})
 		: undefined;
+	// context.payload.pull_request
 
 	pr = workflowRun?.data.pull_requests?.[0];
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 	const sha = pr?.head.sha ?? context.ref;
+	const branch: string =
+		config.branch || (pr?.head.ref ?? context.payload.pull_request?.head.ref ?? context.ref);
 
 	await createPRComment({
 		status: 'building',
@@ -41,8 +43,7 @@ async function main() {
 
 	const project = await getPagesProject();
 
-	const productionEnvironment =
-		githubBranch === project.production_branch || config.branch === project.production_branch;
+	const productionEnvironment = branch === project.production_branch;
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
@@ -58,6 +59,7 @@ async function main() {
 		branchOwner:
 			context.payload.pull_request?.head.repo.owner.login ??
 			workflowRun?.data.triggering_actor?.login,
+		branch,
 	});
 	let alias = pagesDeployment.url;
 

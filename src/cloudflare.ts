@@ -2,7 +2,7 @@ import shellac from 'shellac';
 import path from 'node:path';
 import { fetch } from 'undici';
 import { config } from './config.js';
-import { githubBranch, isPR } from './globals.js';
+import { isPR } from './globals.js';
 import type { Deployment, Project } from '@cloudflare/types';
 
 export async function getPagesProject() {
@@ -30,13 +30,14 @@ export async function getPagesProject() {
 type CreatePagesDeploymentCommentOpts = {
 	isProd: boolean;
 	branchOwner: string;
+	branch: string;
 };
 export async function createPagesDeployment(opts: CreatePagesDeploymentCommentOpts) {
-	const branch = config.branch || githubBranch;
-
 	// use `config.branch` if it's set or if we're in prod, otherwise infer the name
 	const branchName =
-		config.branch || (opts.isProd && isPR === false) ? branch : `${opts.branchOwner}-${branch}`;
+		config.branch || (opts.isProd && isPR === false)
+			? opts.branch
+			: `${opts.branchOwner}-${opts.branch}`;
 
 	// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 	await shellac.in(path.join(process.cwd(), config.workingDirectory))`
