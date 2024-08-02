@@ -53,7 +53,12 @@ async function main() {
 		});
 	}
 
-	const pagesDeployment = await createPagesDeployment(productionEnvironment);
+	const pagesDeployment = await createPagesDeployment({
+		isProd: productionEnvironment,
+		branchOwner:
+			context.payload.pull_request?.head.repo.owner.login ??
+			workflowRun?.data.triggering_actor?.login,
+	});
 	let alias = pagesDeployment.url;
 
 	await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });

@@ -23087,7 +23087,6 @@ var import_github3 = __toESM(require_github());
 var import_github2 = __toESM(require_github());
 var import_process = require("process");
 var githubBranch = import_process.env.GITHUB_HEAD_REF || import_process.env.GITHUB_REF_NAME;
-var prBranchOwner = import_github2.context.payload.pull_request?.head.repo.owner.login;
 var isPR = import_github2.context.eventName === "pull_request" || import_github2.context.eventName === "pull_request_target";
 var isWorkflowRun = import_github2.context.eventName === "workflow_run";
 
@@ -24282,9 +24281,9 @@ async function getPagesProject() {
   }
   return result;
 }
-async function createPagesDeployment(isProd) {
+async function createPagesDeployment(opts) {
   const branch = config.branch || githubBranch;
-  const branchName = config.branch || isProd && isPR === false ? branch : `${prBranchOwner}-${branch}`;
+  const branchName = config.branch || opts.isProd && isPR === false ? branch : `${opts.branchOwner}-${branch}`;
   await src_default.in(import_node_path.default.join(process.cwd(), config.workingDirectory))`
 $ export CLOUDFLARE_API_TOKEN="${config.apiToken}"
 if ${config.accountId} {
@@ -24340,7 +24339,10 @@ async function main() {
       ref: pr?.head.ref ?? import_github5.context.ref
     });
   }
-  const pagesDeployment = await createPagesDeployment(productionEnvironment);
+  const pagesDeployment = await createPagesDeployment({
+    isProd: productionEnvironment,
+    branchOwner: import_github5.context.payload.pull_request?.head.repo.owner.login ?? workflowRun?.data.triggering_actor?.login
+  });
   let alias = pagesDeployment.url;
   await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
   if (githubDeployment) {
