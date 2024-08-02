@@ -24319,6 +24319,10 @@ async function main() {
     run_id: config.runId
   }) : void 0;
   const pr = workflowRun?.data.pull_requests?.[0];
+  console.dir(
+    { workflow: workflowRun?.data },
+    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+  );
   const issueNumber = pr?.id ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   await createPRComment({

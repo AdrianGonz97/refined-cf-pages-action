@@ -21,6 +21,10 @@ async function main() {
 			: undefined;
 
 	const pr = workflowRun?.data.pull_requests?.[0];
+	console.dir(
+		{ workflow: workflowRun?.data },
+		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+	);
 	const issueNumber = pr?.id ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 
