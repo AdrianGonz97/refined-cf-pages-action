@@ -17,9 +17,9 @@ type PullRequest = Unwrap<
 let pr: PullRequest | undefined;
 
 async function main() {
-	if (context.eventName === 'pull_request_target') {
-		throw new Error('Executing in an unsafe environment. See: XXX');
-	}
+	// if (context.eventName === 'pull_request_target') {
+	// 	throw new Error('Executing in an unsafe environment. See: XXX');
+	// }
 
 	const workflowRun = config.runId
 		? await config.octokit.rest.actions.getWorkflowRun({
@@ -28,18 +28,12 @@ async function main() {
 				run_id: config.runId,
 			})
 		: undefined;
-	// context.payload.pull_request
-	console.dir(
-		{ pr: context.payload.pull_request },
-		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-	);
 
-	pr = workflowRun?.data.pull_requests?.[0];
+	pr = workflowRun?.data.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 	const sha = pr?.head.sha ?? context.ref;
-	const branch: string =
-		config.branch || (pr?.head.ref ?? context.payload.pull_request?.head.ref ?? context.ref);
+	const branch = config.branch || (pr?.head.ref ?? context.ref);
 
 	await createPRComment({
 		status: 'building',

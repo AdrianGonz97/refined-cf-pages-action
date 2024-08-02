@@ -24310,23 +24310,16 @@ async function getPagesDeployment() {
 // src/index.ts
 var pr;
 async function main() {
-  if (import_github5.context.eventName === "pull_request_target") {
-    throw new Error("Executing in an unsafe environment. See: XXX");
-  }
   const workflowRun = config.runId ? await config.octokit.rest.actions.getWorkflowRun({
     owner: import_github5.context.repo.owner,
     repo: import_github5.context.repo.repo,
     run_id: config.runId
   }) : void 0;
-  console.dir(
-    { pr: import_github5.context.payload.pull_request },
-    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-  );
-  pr = workflowRun?.data.pull_requests?.[0];
+  pr = workflowRun?.data.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.ref;
-  const branch = config.branch || (pr?.head.ref ?? import_github5.context.payload.pull_request?.head.ref ?? import_github5.context.ref);
+  const branch = config.branch || (pr?.head.ref ?? import_github5.context.ref);
   await createPRComment({
     status: "building",
     previewUrl: "",
