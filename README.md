@@ -59,6 +59,7 @@ jobs:
           # Optional: Change the working directory
           workingDirectory: my-site
           # Optional: Change the Wrangler version, allows you to point to a specific version or a tag such as `beta`
+          # Specifying an empty string ('') will omit the version specifier.
           wranglerVersion: '3'
 ```
 
