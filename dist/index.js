@@ -24314,13 +24314,13 @@ async function main() {
   }) : void 0;
   pr = workflowRun?.data.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
   console.dir(
-    { pr, workflowRun },
+    { pr, ctx: import_github5.context, workflowRun },
     { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
   );
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
-  const sha = pr?.head.sha ?? import_github5.context.sha;
-  const ref = pr?.head.ref ?? import_github5.context.ref;
+  const sha = workflowRun?.data.head_sha ?? pr?.head.sha ?? import_github5.context.sha;
+  const ref = workflowRun?.data.head_branch ?? pr?.head.ref ?? import_github5.context.ref;
   const branch = config.branch || pr?.head.ref || workflowRun?.data.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   const branchOwner = workflowRun?.data.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch, branchOwner });

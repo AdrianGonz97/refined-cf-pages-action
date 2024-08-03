@@ -28,13 +28,14 @@ async function main() {
 	// workflowRun?.data.head_sha;
 	pr = workflowRun?.data.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
 	console.dir(
-		{ pr, workflowRun },
+		{ pr, ctx: context, workflowRun },
 		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
 	);
+
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
-	const sha = pr?.head.sha ?? context.sha;
-	const ref = pr?.head.ref ?? context.ref;
+	const sha = workflowRun?.data.head_sha ?? pr?.head.sha ?? context.sha;
+	const ref = workflowRun?.data.head_branch ?? pr?.head.ref ?? context.ref;
 	const branch =
 		config.branch ||
 		pr?.head.ref ||
