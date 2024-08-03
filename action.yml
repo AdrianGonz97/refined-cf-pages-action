@@ -30,7 +30,7 @@ inputs:
     description: 'The working directory in which to run Wrangler'
     required: false
   wranglerVersion:
-    description: 'The version of Wrangler to use'
+    description: "The version of Wrangler to use. An empty string ('') signifies no version specifier will be applied"
     required: false
     default: '3'
 runs:

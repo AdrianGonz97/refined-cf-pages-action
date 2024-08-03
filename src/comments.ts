@@ -1,5 +1,5 @@
 import { context } from '@actions/github';
-import { isPR } from './globals.js';
+import { isPR, isWorkflowRun } from './globals.js';
 import { config } from './config.js';
 
 type FindExistingCommentOpts = {
@@ -23,17 +23,13 @@ export async function findExistingComment(opts: FindExistingCommentOpts) {
 	for await (const comments of config.octokit.paginate.iterator(listComments, params)) {
 		found = comments.data.find(({ body }) => body?.includes(`<!-- ${opts.messageId} -->`));
 
-		if (found) {
-			break;
-		}
+		if (found) break;
 	}
 
 	if (found) {
 		const { id, body } = found;
 		return { id, body };
 	}
-
-	return;
 }
 
 const Status = {
@@ -45,19 +41,22 @@ const Status = {
 type CreatePRCommentOpts = {
 	previewUrl: string;
 	status: keyof typeof Status;
+	issueNumber: number;
+	runId: number;
+	sha: string;
 };
 export async function createPRComment(opts: CreatePRCommentOpts) {
-	if (!isPR) return;
+	if (!isPR && !isWorkflowRun) return;
 
 	const messageId = `refined-cf-pages-action:deployment-summary:${context.repo.repo}`;
-	const deploymentLogUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+	const deploymentLogUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${opts.runId}`;
 	const status = Status[opts.status];
-	const row = createRow({ previewUrl: opts.previewUrl, status, deploymentLogUrl });
+	const row = createRow({ previewUrl: opts.previewUrl, sha: opts.sha, status, deploymentLogUrl });
 
 	const existingComment = await findExistingComment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
-		issueNumber: context.issue.number,
+		issueNumber: opts.issueNumber,
 		messageId,
 	});
 
@@ -65,7 +64,7 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 		return await config.octokit.rest.issues.createComment({
 			owner: context.repo.owner,
 			repo: context.repo.repo,
-			issue_number: context.issue.number,
+			issue_number: opts.issueNumber,
 			body: createComment(messageId, row),
 		});
 	}
@@ -80,7 +79,7 @@ export async function createPRComment(opts: CreatePRCommentOpts) {
 	return await config.octokit.rest.issues.updateComment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
-		issue_number: context.issue.number,
+		issue_number: opts.issueNumber,
 		comment_id: existingComment.id,
 		body: updatedBody,
 	});
@@ -113,11 +112,10 @@ type CreateRowOpts = {
 	previewUrl: string;
 	deploymentLogUrl: string;
 	status: string;
+	sha: string;
 };
 function createRow(opts: CreateRowOpts): string {
-	return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${
-		opts.previewUrl
-	} | ${context.payload.pull_request?.head.sha || context.ref} |`;
+	return `| **${config.projectName}** | ${opts.status} ([View Log](${opts.deploymentLogUrl})) | ${opts.previewUrl} | ${opts.sha} |`;
 }
 
 function createComment(messageId: string, row: string): string {

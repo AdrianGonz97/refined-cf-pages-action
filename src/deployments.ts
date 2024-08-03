@@ -6,18 +6,20 @@ import type { Deployment } from '@cloudflare/types';
 type CreateGHDeploymentOpts = {
 	productionEnvironment: boolean;
 	environment: string;
+	ref: string;
 };
 export async function createGithubDeployment({
 	productionEnvironment,
 	environment,
+	ref,
 }: CreateGHDeploymentOpts) {
 	const deployment = await config.octokit.rest.repos.createDeployment({
 		owner: context.repo.owner,
 		repo: context.repo.repo,
-		ref: context.payload.pull_request?.head.sha || context.ref,
 		auto_merge: false,
 		description: 'Cloudflare Pages',
 		required_contexts: [],
+		ref,
 		environment,
 		production_environment: productionEnvironment,
 	});
@@ -40,7 +42,6 @@ export async function createGithubDeploymentStatus(opts: CreateGHDeploymentStatu
 		owner: context.repo.owner,
 		repo: context.repo.repo,
 		deployment_id: opts.deploymentId,
-		// @ts-expect-error this should accept a string
 		environment: opts.environmentName,
 		environment_url: opts.environmentUrl,
 		production_environment: opts.productionEnvironment,
@@ -54,8 +55,9 @@ export async function createGithubDeploymentStatus(opts: CreateGHDeploymentStatu
 type CreateJobSummaryOpts = {
 	deployment: Deployment;
 	aliasUrl: string;
+	sha: string;
 };
-export async function createJobSummary({ aliasUrl, deployment }: CreateJobSummaryOpts) {
+export async function createJobSummary({ aliasUrl, deployment, sha }: CreateJobSummaryOpts) {
 	const deployStage = deployment.stages.find((stage) => stage.name === 'deploy');
 
 	let deploymentStatus = '⚡️ Deployment in progress...';
@@ -72,10 +74,7 @@ export async function createJobSummary({ aliasUrl, deployment }: CreateJobSummar
 
 | Name                    | Result |
 | ----------------------- | - |
-| **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(
-				0,
-				8
-			)}\` |
+| **Last commit:**        | \`${sha.substring(0, 8)}\` |
 | **Status**:             | ${deploymentStatus} |
 | **Preview URL**:        | ${deployment.url} |
 | **Branch Preview URL**: | ${aliasUrl} |

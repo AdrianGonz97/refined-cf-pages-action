@@ -2,7 +2,7 @@ import shellac from 'shellac';
 import path from 'node:path';
 import { fetch } from 'undici';
 import { config } from './config.js';
-import { githubBranch, isPR, prBranchOwner } from './globals.js';
+import { isPR } from './globals.js';
 import type { Deployment, Project } from '@cloudflare/types';
 
 export async function getPagesProject() {
@@ -27,12 +27,17 @@ export async function getPagesProject() {
 	return result;
 }
 
-export async function createPagesDeployment(isProd: boolean) {
-	const branch = config.branch || githubBranch;
-
+type CreatePagesDeploymentCommentOpts = {
+	isProd: boolean;
+	branchOwner: string;
+	branch: string;
+};
+export async function createPagesDeployment(opts: CreatePagesDeploymentCommentOpts) {
 	// use `config.branch` if it's set or if we're in prod, otherwise infer the name
 	const branchName =
-		config.branch || (isProd && isPR === false) ? branch : `${prBranchOwner}-${branch}`;
+		config.branch || (opts.isProd && isPR === false)
+			? opts.branch
+			: `${opts.branchOwner}-${opts.branch}`;
 
 	// TODO: Replace this with an API call to wrangler so we can get back a full deployment response object
 	await shellac.in(path.join(process.cwd(), config.workingDirectory))`
@@ -41,7 +46,7 @@ if ${config.accountId} {
   $ export CLOUDFLARE_ACCOUNT_ID="${config.accountId}"
 }
 
-$$ npx wrangler@${config.wranglerVersion} pages deploy "${config.directory}" --project-name="${config.projectName}" --branch="${branchName}"
+$$ npx wrangler${config.wranglerVersion ? `@${config.wranglerVersion}` : ''} pages deploy "${config.directory}" --project-name="${config.projectName}" --branch="${branchName}"
 `;
 
 	return getPagesDeployment();

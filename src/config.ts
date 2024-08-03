@@ -6,7 +6,7 @@ function loadConfig() {
 		const githubToken = getInput('githubToken', { required: true });
 		return {
 			githubToken,
-			octokit: getOctokit(githubToken),
+			octokit: getOctokit(githubToken, { log: console }),
 			apiToken: getInput('apiToken', { required: true }),
 			accountId: getInput('accountId', { required: true }),
 			projectName: getInput('projectName', { required: true }),
