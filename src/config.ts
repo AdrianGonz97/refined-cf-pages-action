@@ -15,7 +15,6 @@ function loadConfig() {
 			deploymentName: getInput('deploymentName', { required: false }),
 			workingDirectory: getInput('workingDirectory', { required: false }),
 			wranglerVersion: getInput('wranglerVersion', { required: false }),
-			runId: +getInput('runId', { required: false }) || undefined,
 		};
 	} catch (error) {
 		// @ts-expect-error always print the message

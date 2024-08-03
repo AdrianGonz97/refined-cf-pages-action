@@ -23070,8 +23070,7 @@ function loadConfig() {
       branch: (0, import_core.getInput)("branch", { required: false }),
       deploymentName: (0, import_core.getInput)("deploymentName", { required: false }),
       workingDirectory: (0, import_core.getInput)("workingDirectory", { required: false }),
-      wranglerVersion: (0, import_core.getInput)("wranglerVersion", { required: false }),
-      runId: +(0, import_core.getInput)("runId", { required: false }) || void 0
+      wranglerVersion: (0, import_core.getInput)("wranglerVersion", { required: false })
     };
   } catch (error) {
     (0, import_core.setFailed)(error.message);
@@ -23086,7 +23085,7 @@ var import_github3 = __toESM(require_github());
 // src/globals.ts
 var import_github2 = __toESM(require_github());
 var isPR = import_github2.context.eventName === "pull_request" || import_github2.context.eventName === "pull_request_target";
-var isWorkflowRun = import_github2.context.eventName === "workflow_run" && Boolean(config.runId);
+var isWorkflowRun = import_github2.context.eventName === "workflow_run";
 
 // src/comments.ts
 async function findExistingComment(opts) {
