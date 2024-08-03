@@ -24319,7 +24319,7 @@ async function main() {
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.sha;
-  const branch = config.branch || (pr?.head.ref ?? import_github5.context.ref.slice(10));
+  const branch = config.branch || (pr?.head.ref ?? import_github5.context.ref);
   await createPRComment({
     status: "building",
     previewUrl: "",
