@@ -106,34 +106,80 @@ If you have already connected your repository to the [Cloudflare Pages GitHub in
 
 ### Enabling PR Previews from Forks
 
-Enabling PR previews from forks requires the use of the [`pull_request_target`](https://docs.github.com/en/actions/using-workflows/events-that-trigger-workflows#pull_request_target) event in the workflow, which has security concerns around exposing secrets that need to be considered before implementing it into your project.
+If your site _does not_ use/have any runtime secrets in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [shadcn-svelte](https://github.com/huntabyte/shadcn-svelte) and its implementation can be found in this [workflow file](https://github.com/huntabyte/shadcn-svelte/blob/main/.github/workflows).
 
-If your site _does not_ use/have any secrets during **the build step** or in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [Formsnap](https://github.com/svecosystem/formsnap) and its implementation can be found in this [workflow file](https://github.com/svecosystem/formsnap/blob/main/.github/workflows/docs-preview.yml).
-
-<details><summary>Example: Preview Deployment with <b>NO SECRETS</b></summary>
+<details><summary>Example: Preview Deployment with <b>NO RUNTIME/BUILD-TIME SECRETS</b></summary>
 <p>
 
+First we'll build the project in an unprivileged environment where secrets are not exposed. This allows use to safely run untrusted code:
+
 ```yaml
-name: Preview Deployment
+# build-preview.yml
+name: Build Preview Deployment
+
 on:
-  pull_request_target:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build-preview:
+    runs-on: ubuntu-latest
+    name: Build Preview Site and Upload Build Artifact
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Run your install/build steps here
+      # ...
+
+      # Build example
+      - name: Build site
+        run: pnpm build
+        env:
+          # if you need environment variables that are _NOT secrets_, apply them here during build
+          # using GH Action variables
+          SOME_ENV_VAR: ${{ vars.SOME_ENV_VAR }}
+
+      # Uploads the build directory as a workflow artifact
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-build
+          path: YOUR_BUILD_OUTPUT_DIRECTORY
+```
+
+Then we'll deploy the project to Cloudflare in a privileged environment where we can safely use secrets (i.e. your cloudflare credentials):
+
+```yaml
+# deploy-preview.yml
+name: Upload Preview Deployment
+on:
+  workflow_run:
+    workflows: ['Build Preview Deployment']
+    types:
+      - completed
+
+permissions:
+  actions: read
+  deployments: write
+  contents: read
+  pull-requests: write
 
 jobs:
   deploy-preview:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      pull-requests: write
-      deployments: write
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     name: Deploy Preview to Cloudflare Pages
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      # Downloads the build directory from the previous workflow
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        id: preview-build-artifact
         with:
-          ref: ${{ github.event.pull_request.head.ref }}
-          repository: ${{ github.event.pull_request.head.repo.full_name }}
-
-      # Run your install/build steps here
+          name: preview-build
+          path: build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Deploy to Cloudflare Pages
         uses: AdrianGonz97/refined-cf-pages-action@v1
@@ -142,18 +188,107 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           githubToken: ${{ secrets.GITHUB_TOKEN }}
           projectName: YOUR_PROJECT_NAME
-          directory: YOUR_BUILD_OUTPUT_DIRECTORY
           deploymentName: Preview
+          directory: ${{ steps.preview-build-artifact.outputs.download-path }}
 ```
 
 </p>
 </details>
 
-If your project _does use secrets_, then the deployment job can be fitted with an `environment` field that requires manual approval before each deployment (like it does in this [Melt UI workflow](https://github.com/melt-ui/melt-ui/blob/develop/.github/workflows/preview.yml)).
+If your project **does use runtime secrets**, then the deployment job can be fitted with an `environment` field that requires manual approval before each deployment.
 
 Manual approval using [environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) needs to be setup at the repo level, as described in this [Melt UI PR](https://github.com/melt-ui/melt-ui/pull/899) under the _"Make the `Preview` environment protected"_ step.
 
-<details><summary>Example: Preview Deployment <b>WITH SECRETS</b></summary>
+<details><summary>Example: Preview Deployment <b>WITH RUNTIME SECRETS</b></summary>
+<p>
+
+```yaml
+# build-preview.yml
+name: Build Preview Deployment
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  build-preview:
+    environment: Preview # The name of the environment that requires manual approval before each deployment
+    runs-on: ubuntu-latest
+    name: Build Preview Site and Upload Build Artifact
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Run your install/build steps here
+      # ...
+
+      # Build example
+      - name: Build site
+        run: pnpm build
+        env:
+          # If you need environment variables that are **NOT secrets**,
+          # apply them here during build using GH Action Variables
+          SOME_ENV_VAR: ${{ vars.SOME_ENV_VAR }}
+
+      # Uploads the build directory as a workflow artifact
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: preview-build
+          path: YOUR_BUILD_OUTPUT_DIRECTORY
+```
+
+```yaml
+# deploy-preview.yml
+name: Upload Preview Deployment
+on:
+  workflow_run:
+    workflows: ['Build Preview Deployment']
+    types:
+      - completed
+
+permissions:
+  actions: read
+  deployments: write
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy-preview:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    name: Deploy Preview to Cloudflare Pages
+    steps:
+      # Downloads the build directory from the previous workflow
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        id: preview-build-artifact
+        with:
+          name: preview-build
+          path: build
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Deploy to Cloudflare Pages
+        uses: AdrianGonz97/refined-cf-pages-action@v1
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          githubToken: ${{ secrets.GITHUB_TOKEN }}
+          projectName: YOUR_PROJECT_NAME
+          deploymentName: Preview
+          directory: ${{ steps.preview-build-artifact.outputs.download-path }}
+```
+
+</p>
+</details>
+
+In the off chance that you need **build-time secrets** (which you should try to avoid if possible for previews), then you'll need to use the `pull_request_target` event _with_ manual approvals before each deployment.
+
+> [!IMPORTANT]
+> With this method, each PR needs to be reviewed thoroughly before deployment approval to ensure that secrets are not being exposed via malicious code. Use with discretion.
+
+<details><summary>Example: Preview Deployment <b>WITH BUILD-TIME SECRETS</b></summary>
 <p>
 
 ```yaml
@@ -171,17 +306,19 @@ jobs:
       deployments: write
     name: Deploy Preview to Cloudflare Pages
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.ref }}
           repository: ${{ github.event.pull_request.head.repo.full_name }}
 
       # Run your install/build steps here
+      # ...
 
+      # Build example
       - name: Build site
         run: pnpm build
         env:
-          SOME_SECRET: 'foo' # Uses some secret during build!
+          SOME_SECRET: ${{ secrets.SOME_SECRET }} # Uses some secret during build
 
       - name: Deploy to Cloudflare Pages
         uses: AdrianGonz97/refined-cf-pages-action@v1
