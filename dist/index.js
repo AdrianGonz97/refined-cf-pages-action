@@ -24316,6 +24316,7 @@ async function main() {
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.sha;
+  const ref = pr?.head.ref ?? import_github5.context.ref;
   const branch = config.branch || pr?.head.ref || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch });
   if (branch === void 0) {
@@ -24333,9 +24334,9 @@ async function main() {
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({
+      ref,
       productionEnvironment,
-      environment: config.deploymentName,
-      ref: pr?.head.ref ?? import_github5.context.ref
+      environment: config.deploymentName
     });
   }
   const pagesDeployment = await createPagesDeployment({
@@ -24380,7 +24381,7 @@ async function main() {
     await createPRComment({
       status: "fail",
       previewUrl: "",
-      sha: pr?.head.sha ?? import_github5.context.ref,
+      sha: pr?.head.sha ?? import_github5.context.sha,
       issueNumber: pr?.number ?? import_github5.context.issue.number,
       runId: config.runId ?? import_github5.context.runId
     });

@@ -29,6 +29,7 @@ async function main() {
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 	const sha = pr?.head.sha ?? context.sha;
+	const ref = pr?.head.ref ?? context.ref;
 	const branch =
 		config.branch || pr?.head.ref || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
 
@@ -53,9 +54,9 @@ async function main() {
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
 		githubDeployment = await createGithubDeployment({
+			ref,
 			productionEnvironment,
 			environment: config.deploymentName,
-			ref: pr?.head.ref ?? context.ref,
 		});
 	}
 
@@ -114,7 +115,7 @@ async function main() {
 		await createPRComment({
 			status: 'fail',
 			previewUrl: '',
-			sha: pr?.head.sha ?? context.ref,
+			sha: pr?.head.sha ?? context.sha,
 			issueNumber: pr?.number ?? context.issue.number,
 			runId: config.runId ?? context.runId,
 		});
