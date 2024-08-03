@@ -42,6 +42,7 @@ jobs:
         uses: actions/checkout@v3
 
       # Run a build step here if your project requires one
+      # ...
 
       - name: Publish to Cloudflare Pages
         uses: AdrianGonz97/refined-cf-pages-action@v1
