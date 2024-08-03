@@ -25,7 +25,12 @@ async function main() {
 			})
 		: undefined;
 
+	// workflowRun?.data.head_sha;
 	pr = workflowRun?.data.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
+	console.dir(
+		{ pr, workflowRun },
+		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+	);
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 	const sha = pr?.head.sha ?? context.sha;
