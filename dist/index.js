@@ -24307,22 +24307,23 @@ async function getPagesDeployment() {
 // src/index.ts
 var pr;
 async function main() {
-  const workflowRun = config.runId ? await config.octokit.rest.actions.getWorkflowRun({
-    owner: import_github5.context.repo.owner,
-    repo: import_github5.context.repo.repo,
-    run_id: config.runId
-  }) : void 0;
-  pr = workflowRun?.data.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
-  console.dir(
-    { pr, ctx: import_github5.context, workflowRun },
-    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-  );
+  const workflowRun = isWorkflowRun ? import_github5.context.payload.workflow_run : void 0;
+  pr = workflowRun?.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
-  const sha = workflowRun?.data.head_sha ?? pr?.head.sha ?? import_github5.context.sha;
-  const ref = workflowRun?.data.head_branch ?? pr?.head.ref ?? import_github5.context.ref;
-  const branch = config.branch || pr?.head.ref || workflowRun?.data.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
-  const branchOwner = workflowRun?.data.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
+  const sha = workflowRun?.head_sha ?? pr?.head.sha ?? import_github5.context.sha;
+  const ref = workflowRun?.head_branch ?? pr?.head.ref ?? import_github5.context.ref;
+  const branch = config.branch || pr?.head.ref || workflowRun?.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
+  const branchOwner = workflowRun?.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
+  const pullRequests = isWorkflowRun ? await config.octokit.rest.pulls.list({
+    owner: import_github5.context.repo.owner,
+    repo: import_github5.context.repo.repo,
+    head: `${branchOwner}:${branch}`
+  }) : [];
+  console.dir(
+    { pullRequests },
+    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+  );
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch, branchOwner });
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");

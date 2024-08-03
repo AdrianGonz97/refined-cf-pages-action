@@ -8,44 +8,53 @@ import {
 	createJobSummary,
 } from './deployments.js';
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
+import { isWorkflowRun } from './globals.js';
 
 type Unwrap<T> = T extends Array<infer U> ? U : T;
-type PullRequest = Unwrap<
-	Awaited<ReturnType<typeof config.octokit.rest.actions.getWorkflowRun>>['data']['pull_requests']
->;
+type PullRequest = Unwrap<WorkflowRun['pull_requests']>;
+
+type WorkflowRun = Awaited<ReturnType<typeof config.octokit.rest.actions.getWorkflowRun>>['data'];
 
 let pr: PullRequest | undefined;
 
 async function main() {
-	const workflowRun = config.runId
-		? await config.octokit.rest.actions.getWorkflowRun({
-				owner: context.repo.owner,
-				repo: context.repo.repo,
-				run_id: config.runId,
-			})
+	const workflowRun: WorkflowRun | undefined = isWorkflowRun
+		? context.payload.workflow_run
 		: undefined;
-
 	// workflowRun?.data.head_sha;
-	pr = workflowRun?.data.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
-	console.dir(
-		{ pr, ctx: context, workflowRun },
-		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-	);
+
+	pr = workflowRun?.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
+
+	// console.dir(
+	// 	{ pr, ctx: context, workflowRun },
+	// 	{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+	// );
 
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
-	const sha = workflowRun?.data.head_sha ?? pr?.head.sha ?? context.sha;
-	const ref = workflowRun?.data.head_branch ?? pr?.head.ref ?? context.ref;
+	const sha = workflowRun?.head_sha ?? pr?.head.sha ?? context.sha;
+	const ref = workflowRun?.head_branch ?? pr?.head.ref ?? context.ref;
 	const branch =
 		config.branch ||
 		pr?.head.ref ||
-		workflowRun?.data.head_branch ||
+		workflowRun?.head_branch ||
 		process.env.GITHUB_HEAD_REF ||
 		process.env.GITHUB_REF_NAME;
+	const branchOwner: string =
+		workflowRun?.head_repository.owner.login ?? context.payload.pull_request?.head.repo.owner.login;
 
-	const branchOwner =
-		workflowRun?.data.head_repository.owner.login ??
-		context.payload.pull_request?.head.repo.owner.login;
+	const pullRequests = isWorkflowRun
+		? await config.octokit.rest.pulls.list({
+				owner: context.repo.owner,
+				repo: context.repo.repo,
+				head: `${branchOwner}:${branch}`,
+			})
+		: [];
+
+	console.dir(
+		{ pullRequests },
+		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
+	);
 
 	config.octokit.log.debug('Detected settings', { issueNumber, runId, sha, branch, branchOwner });
 
