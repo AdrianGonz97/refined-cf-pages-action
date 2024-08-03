@@ -29,7 +29,7 @@ async function main() {
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 	const sha = pr?.head.sha ?? context.sha;
-	const branch = config.branch || (pr?.head.ref ?? context.ref);
+	const branch = config.branch || (pr?.head.ref ?? context.ref.slice(10));
 
 	await createPRComment({
 		status: 'building',
