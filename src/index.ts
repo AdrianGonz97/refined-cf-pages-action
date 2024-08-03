@@ -21,35 +21,36 @@ async function main() {
 	const workflowRun: WorkflowRun | undefined = isWorkflowRun
 		? context.payload.workflow_run
 		: undefined;
-	// workflowRun?.data.head_sha;
 
-	pr = workflowRun?.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
-
-	// console.dir(
-	// 	{ pr, ctx: context, workflowRun },
-	// 	{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-	// );
-
-	const issueNumber = pr?.number ?? context.issue.number;
-	const runId = config.runId ?? context.runId;
-	const sha = workflowRun?.head_sha ?? pr?.head.sha ?? context.sha;
-	const ref = workflowRun?.head_branch ?? pr?.head.ref ?? context.ref;
 	const branch =
 		config.branch ||
 		pr?.head.ref ||
 		workflowRun?.head_branch ||
 		process.env.GITHUB_HEAD_REF ||
 		process.env.GITHUB_REF_NAME;
+
 	const branchOwner: string =
 		workflowRun?.head_repository.owner.login ?? context.payload.pull_request?.head.repo.owner.login;
 
 	const pullRequests = isWorkflowRun
-		? await config.octokit.rest.pulls.list({
-				owner: context.repo.owner,
-				repo: context.repo.repo,
-				head: `${branchOwner}:${branch}`,
-			})
+		? (
+				await config.octokit.rest.pulls.list({
+					owner: context.repo.owner,
+					repo: context.repo.repo,
+					head: `${branchOwner}:${branch}`,
+				})
+			).data
 		: [];
+
+	pr =
+		workflowRun?.pull_requests?.[0] ??
+		pullRequests.find((p) => p.title === workflowRun?.display_title) ??
+		(context.payload.pull_request as PullRequest);
+
+	const issueNumber = pr?.number ?? context.issue.number;
+	const runId = config.runId ?? context.runId;
+	const sha = workflowRun?.head_sha ?? pr?.head.sha ?? context.sha;
+	const ref = workflowRun?.head_branch ?? pr?.head.ref ?? context.ref;
 
 	console.dir(
 		{ pullRequests },

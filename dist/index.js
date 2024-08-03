@@ -24308,18 +24308,18 @@ async function getPagesDeployment() {
 var pr;
 async function main() {
   const workflowRun = isWorkflowRun ? import_github5.context.payload.workflow_run : void 0;
-  pr = workflowRun?.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
+  const branch = config.branch || pr?.head.ref || workflowRun?.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
+  const branchOwner = workflowRun?.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
+  const pullRequests = isWorkflowRun ? (await config.octokit.rest.pulls.list({
+    owner: import_github5.context.repo.owner,
+    repo: import_github5.context.repo.repo,
+    head: `${branchOwner}:${branch}`
+  })).data : [];
+  pr = workflowRun?.pull_requests?.[0] ?? pullRequests.find((p) => p.title === workflowRun?.display_title) ?? import_github5.context.payload.pull_request;
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = workflowRun?.head_sha ?? pr?.head.sha ?? import_github5.context.sha;
   const ref = workflowRun?.head_branch ?? pr?.head.ref ?? import_github5.context.ref;
-  const branch = config.branch || pr?.head.ref || workflowRun?.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
-  const branchOwner = workflowRun?.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
-  const pullRequests = isWorkflowRun ? await config.octokit.rest.pulls.list({
-    owner: import_github5.context.repo.owner,
-    repo: import_github5.context.repo.repo,
-    head: `${branchOwner}:${branch}`
-  }) : [];
   console.dir(
     { pullRequests },
     { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
