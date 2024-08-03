@@ -78,7 +78,7 @@ async function main() {
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
 		githubDeployment = await createGithubDeployment({
-			ref,
+			ref: sha,
 			productionEnvironment,
 			environment: config.deploymentName,
 		});

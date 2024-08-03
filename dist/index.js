@@ -24340,7 +24340,7 @@ async function main() {
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({
-      ref,
+      ref: sha,
       productionEnvironment,
       environment: config.deploymentName
     });
