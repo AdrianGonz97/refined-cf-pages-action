@@ -23062,7 +23062,7 @@ function loadConfig() {
     const githubToken = (0, import_core.getInput)("githubToken", { required: true });
     return {
       githubToken,
-      octokit: (0, import_github.getOctokit)(githubToken),
+      octokit: (0, import_github.getOctokit)(githubToken, { log: console }),
       apiToken: (0, import_core.getInput)("apiToken", { required: true }),
       accountId: (0, import_core.getInput)("accountId", { required: true }),
       projectName: (0, import_core.getInput)("projectName", { required: true }),
@@ -24319,7 +24319,7 @@ async function main() {
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.sha;
-  const branch = config.branch || (pr?.head.ref ?? (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME));
+  const branch = config.branch || pr?.head.ref || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch });
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");
