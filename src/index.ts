@@ -48,14 +48,8 @@ async function main() {
 		(context.payload.pull_request as PullRequest);
 
 	const issueNumber = pr?.number ?? context.issue.number;
-	const runId = config.runId ?? context.runId;
+	const runId = workflowRun?.id ?? context.runId;
 	const sha = workflowRun?.head_sha ?? pr?.head.sha ?? context.sha;
-	const ref = workflowRun?.head_branch ?? pr?.head.ref ?? context.ref;
-
-	console.dir(
-		{ pullRequests },
-		{ maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-	);
 
 	config.octokit.log.debug('Detected settings', { issueNumber, runId, sha, branch, branchOwner });
 
@@ -124,7 +118,7 @@ async function main() {
 	setOutput('environment', deployment.environment);
 	setOutput('alias', alias);
 
-	await createJobSummary({ deployment, aliasUrl: alias, sha });
+	await createJobSummary({ sha, deployment, aliasUrl: alias });
 }
 
 (async () => {
@@ -139,7 +133,7 @@ async function main() {
 			previewUrl: '',
 			sha: pr?.head.sha ?? context.sha,
 			issueNumber: pr?.number ?? context.issue.number,
-			runId: config.runId ?? context.runId,
+			runId: context.payload.workflow_run.id ?? context.runId,
 		});
 	}
 })();

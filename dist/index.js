@@ -24317,13 +24317,8 @@ async function main() {
   })).data : [];
   pr = workflowRun?.pull_requests?.[0] ?? pullRequests.find((p) => p.title === workflowRun?.display_title) ?? import_github5.context.payload.pull_request;
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
-  const runId = config.runId ?? import_github5.context.runId;
+  const runId = workflowRun?.id ?? import_github5.context.runId;
   const sha = workflowRun?.head_sha ?? pr?.head.sha ?? import_github5.context.sha;
-  const ref = workflowRun?.head_branch ?? pr?.head.ref ?? import_github5.context.ref;
-  console.dir(
-    { pullRequests },
-    { maxArrayLength: Infinity, maxStringLength: Infinity, depth: Infinity }
-  );
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch, branchOwner });
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");
@@ -24377,7 +24372,7 @@ async function main() {
   (0, import_core3.setOutput)("url", deployment.url);
   (0, import_core3.setOutput)("environment", deployment.environment);
   (0, import_core3.setOutput)("alias", alias);
-  await createJobSummary({ deployment, aliasUrl: alias, sha });
+  await createJobSummary({ sha, deployment, aliasUrl: alias });
 }
 (async () => {
   try {
@@ -24389,7 +24384,7 @@ async function main() {
       previewUrl: "",
       sha: pr?.head.sha ?? import_github5.context.sha,
       issueNumber: pr?.number ?? import_github5.context.issue.number,
-      runId: config.runId ?? import_github5.context.runId
+      runId: import_github5.context.payload.workflow_run.id ?? import_github5.context.runId
     });
   }
 })();
