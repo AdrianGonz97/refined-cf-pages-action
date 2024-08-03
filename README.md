@@ -106,7 +106,7 @@ If you have already connected your repository to the [Cloudflare Pages GitHub in
 
 ### Enabling PR Previews from Forks
 
-If your site _does not_ use/have any runtime secrets in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [shadcn-svelte](https://github.com/huntabyte/shadcn-svelte) and its implementation can be found in this [workflow file](https://github.com/huntabyte/shadcn-svelte/blob/main/.github/workflows).
+If your site _does not_ use/have any runtime secrets in your **preview environment on Cloudflare**, then it should be fine to use as-is. We use this method in [shadcn-svelte](https://github.com/huntabyte/shadcn-svelte) and its implementation can be found [here](https://github.com/huntabyte/shadcn-svelte/blob/main/.github/workflows).
 
 <details><summary>Example: Preview Deployment with <b>NO RUNTIME/BUILD-TIME SECRETS</b></summary>
 <p>
@@ -195,6 +195,8 @@ jobs:
 </p>
 </details>
 
+---
+
 If your project **does use runtime secrets**, then the deployment job can be fitted with an `environment` field that requires manual approval before each deployment.
 
 Manual approval using [environments](https://docs.github.com/en/actions/deployment/targeting-different-environments/using-environments-for-deployment) needs to be setup at the repo level, as described in this [Melt UI PR](https://github.com/melt-ui/melt-ui/pull/899) under the _"Make the `Preview` environment protected"_ step.
@@ -282,6 +284,8 @@ jobs:
 
 </p>
 </details>
+
+---
 
 In the off chance that you need **build-time secrets** (which you should try to avoid if possible for previews), then you'll need to use the `pull_request_target` event _with_ manual approvals before each deployment.
 
