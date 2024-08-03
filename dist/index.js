@@ -24322,7 +24322,8 @@ async function main() {
   const sha = pr?.head.sha ?? import_github5.context.sha;
   const ref = pr?.head.ref ?? import_github5.context.ref;
   const branch = config.branch || pr?.head.ref || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
-  config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch });
+  const branchOwner = workflowRun?.data.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
+  config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch, branchOwner });
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");
   }
@@ -24345,7 +24346,7 @@ async function main() {
   }
   const pagesDeployment = await createPagesDeployment({
     isProd: productionEnvironment,
-    branchOwner: import_github5.context.payload.pull_request?.head.repo.owner.login ?? workflowRun?.data.triggering_actor?.login,
+    branchOwner,
     branch
   });
   let alias = pagesDeployment.url;
