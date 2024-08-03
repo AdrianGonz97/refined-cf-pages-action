@@ -31,7 +31,12 @@ async function main() {
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
 	const sha = pr?.head.sha ?? context.sha;
-	const branch = config.branch || (pr?.head.ref ?? (process.env.GITHUB_REF_NAME as string));
+	const branch =
+		config.branch || (pr?.head.ref ?? (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME));
+
+	if (branch === undefined) {
+		throw new Error('Unable to determine branch name');
+	}
 
 	await createPRComment({
 		status: 'building',

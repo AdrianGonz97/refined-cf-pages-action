@@ -24320,7 +24320,10 @@ async function main() {
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.sha;
-  const branch = config.branch || (pr?.head.ref ?? process.env.GITHUB_REF_NAME);
+  const branch = config.branch || (pr?.head.ref ?? (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME));
+  if (branch === void 0) {
+    throw new Error("Unable to determine branch name");
+  }
   await createPRComment({
     status: "building",
     previewUrl: "",
