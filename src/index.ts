@@ -36,7 +36,11 @@ async function main() {
 	const sha = pr?.head.sha ?? context.sha;
 	const ref = pr?.head.ref ?? context.ref;
 	const branch =
-		config.branch || pr?.head.ref || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
+		config.branch ||
+		pr?.head.ref ||
+		workflowRun?.data.head_branch ||
+		process.env.GITHUB_HEAD_REF ||
+		process.env.GITHUB_REF_NAME;
 
 	const branchOwner =
 		workflowRun?.data.head_repository.owner.login ??

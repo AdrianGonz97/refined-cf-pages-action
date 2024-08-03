@@ -24321,7 +24321,7 @@ async function main() {
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.sha;
   const ref = pr?.head.ref ?? import_github5.context.ref;
-  const branch = config.branch || pr?.head.ref || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
+  const branch = config.branch || pr?.head.ref || workflowRun?.data.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   const branchOwner = workflowRun?.data.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch, branchOwner });
   if (branch === void 0) {
