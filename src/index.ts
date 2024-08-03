@@ -34,6 +34,8 @@ async function main() {
 	const branch =
 		config.branch || (pr?.head.ref ?? (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME));
 
+	config.octokit.log.debug('Detected settings', { issueNumber, runId, sha, branch });
+
 	if (branch === undefined) {
 		throw new Error('Unable to determine branch name');
 	}

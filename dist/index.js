@@ -24315,12 +24315,12 @@ async function main() {
     repo: import_github5.context.repo.repo,
     run_id: config.runId
   }) : void 0;
-  console.log({ ref_name: process.env.GITHUB_REF_NAME, head_ref: process.env.GITHUB_HEAD_REF });
   pr = workflowRun?.data.pull_requests?.[0] ?? import_github5.context.payload.pull_request;
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = config.runId ?? import_github5.context.runId;
   const sha = pr?.head.sha ?? import_github5.context.sha;
   const branch = config.branch || (pr?.head.ref ?? (process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME));
+  config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch });
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");
   }
