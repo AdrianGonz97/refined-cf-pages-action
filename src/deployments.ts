@@ -55,8 +55,9 @@ export async function createGithubDeploymentStatus(opts: CreateGHDeploymentStatu
 type CreateJobSummaryOpts = {
 	deployment: Deployment;
 	aliasUrl: string;
+	sha: string;
 };
-export async function createJobSummary({ aliasUrl, deployment }: CreateJobSummaryOpts) {
+export async function createJobSummary({ aliasUrl, deployment, sha }: CreateJobSummaryOpts) {
 	const deployStage = deployment.stages.find((stage) => stage.name === 'deploy');
 
 	let deploymentStatus = '⚡️ Deployment in progress...';
@@ -73,10 +74,7 @@ export async function createJobSummary({ aliasUrl, deployment }: CreateJobSummar
 
 | Name                    | Result |
 | ----------------------- | - |
-| **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(
-				0,
-				8
-			)}\` |
+| **Last commit:**        | \`${sha.substring(0, 8)}\` |
 | **Status**:             | ${deploymentStatus} |
 | **Preview URL**:        | ${deployment.url} |
 | **Branch Preview URL**: | ${aliasUrl} |

@@ -23218,7 +23218,7 @@ async function createGithubDeploymentStatus(opts) {
     auto_inactive: false
   });
 }
-async function createJobSummary({ aliasUrl, deployment }) {
+async function createJobSummary({ aliasUrl, deployment, sha }) {
   const deployStage = deployment.stages.find((stage) => stage.name === "deploy");
   let deploymentStatus = "\u26A1\uFE0F Deployment in progress...";
   if (deployStage?.status === "success") {
@@ -23232,10 +23232,7 @@ async function createJobSummary({ aliasUrl, deployment }) {
 
 | Name                    | Result |
 | ----------------------- | - |
-| **Last commit:**        | \`${deployment.deployment_trigger.metadata.commit_hash.substring(
-      0,
-      8
-    )}\` |
+| **Last commit:**        | \`${sha.substring(0, 8)}\` |
 | **Status**:             | ${deploymentStatus} |
 | **Preview URL**:        | ${deployment.url} |
 | **Branch Preview URL**: | ${aliasUrl} |
@@ -24347,7 +24344,7 @@ async function main() {
     branch
   });
   let alias = pagesDeployment.url;
-  await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
+  await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url, sha });
   if (githubDeployment) {
     await createGithubDeploymentStatus({
       productionEnvironment,
@@ -24373,7 +24370,7 @@ async function main() {
   (0, import_core3.setOutput)("url", deployment.url);
   (0, import_core3.setOutput)("environment", deployment.environment);
   (0, import_core3.setOutput)("alias", alias);
-  await createJobSummary({ deployment, aliasUrl: alias });
+  await createJobSummary({ deployment, aliasUrl: alias, sha });
 }
 (async () => {
   try {

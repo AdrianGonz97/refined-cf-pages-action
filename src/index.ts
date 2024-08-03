@@ -68,7 +68,7 @@ async function main() {
 	});
 	let alias = pagesDeployment.url;
 
-	await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url });
+	await createJobSummary({ deployment: pagesDeployment, aliasUrl: pagesDeployment.url, sha });
 
 	if (githubDeployment) {
 		await createGithubDeploymentStatus({
@@ -101,7 +101,7 @@ async function main() {
 	setOutput('environment', deployment.environment);
 	setOutput('alias', alias);
 
-	await createJobSummary({ deployment, aliasUrl: alias });
+	await createJobSummary({ deployment, aliasUrl: alias, sha });
 }
 
 (async () => {
