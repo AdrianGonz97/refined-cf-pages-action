@@ -25,8 +25,6 @@ async function main() {
 			})
 		: undefined;
 
-	console.log({ ref_name: process.env.GITHUB_REF_NAME, head_ref: process.env.GITHUB_HEAD_REF });
-
 	pr = workflowRun?.data.pull_requests?.[0] ?? (context.payload.pull_request as PullRequest);
 	const issueNumber = pr?.number ?? context.issue.number;
 	const runId = config.runId ?? context.runId;
