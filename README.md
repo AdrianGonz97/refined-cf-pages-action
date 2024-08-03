@@ -287,7 +287,7 @@ jobs:
 
 ---
 
-In the off chance that you need **build-time secrets** (which you should try to avoid if possible for previews), then you'll need to use the `pull_request_target` event _with_ manual approvals before each deployment.
+In the off chance that you need **build-time secrets** (which you should try to avoid for previews), then you'll need to use the `pull_request_target` event _with_ manual approvals before each deployment.
 
 > [!IMPORTANT]
 > With this method, each PR needs to be reviewed thoroughly before deployment approval to ensure that secrets are not being exposed via malicious code. Use with discretion.
