@@ -24276,7 +24276,7 @@ async function getPagesProject() {
   return result;
 }
 async function createPagesDeployment(opts) {
-  const branchName = config.branch || opts.isProd && isPR === false ? opts.branch : `${opts.branchOwner}-${opts.branch}`;
+  const branchName = config.branch || (opts.isProd ? opts.branch : `${opts.branchOwner}-${opts.branch}`);
   await src_default.in(import_node_path.default.join(process.cwd(), config.workingDirectory))`
 $ export CLOUDFLARE_API_TOKEN="${config.apiToken}"
 if ${config.accountId} {
@@ -24330,7 +24330,7 @@ async function main() {
     runId
   });
   const project = await getPagesProject();
-  const productionEnvironment = branch === project.production_branch;
+  const productionEnvironment = branch === project.production_branch && !isPR && !isWorkflowRun;
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({

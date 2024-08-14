@@ -8,7 +8,7 @@ import {
 	createJobSummary,
 } from './deployments.js';
 import { createPagesDeployment, getPagesDeployment, getPagesProject } from './cloudflare.js';
-import { isWorkflowRun } from './globals.js';
+import { isPR, isWorkflowRun } from './globals.js';
 
 type Unwrap<T> = T extends Array<infer U> ? U : T;
 type PullRequest = Unwrap<WorkflowRun['pull_requests']>;
@@ -67,7 +67,7 @@ async function main() {
 
 	const project = await getPagesProject();
 
-	const productionEnvironment = branch === project.production_branch;
+	const productionEnvironment = branch === project.production_branch && !isPR && !isWorkflowRun;
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
