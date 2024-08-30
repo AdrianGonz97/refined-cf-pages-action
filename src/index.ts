@@ -47,7 +47,7 @@ async function main() {
 		pullRequests.find((p) => p.title === workflowRun?.display_title) ??
 		(context.payload.pull_request as PullRequest);
 
-	const issueNumber = pr?.number ?? context.issue.number;
+	const issueNumber = pr?.number ?? (context.issue.number as number | undefined);
 	const runId = workflowRun?.id ?? context.runId;
 	const sha = workflowRun?.head_sha ?? pr?.head.sha ?? context.sha;
 
@@ -57,13 +57,15 @@ async function main() {
 		throw new Error('Unable to determine branch name');
 	}
 
-	await createPRComment({
-		status: 'building',
-		previewUrl: '',
-		sha,
-		issueNumber,
-		runId,
-	});
+	if (issueNumber !== undefined) {
+		await createPRComment({
+			status: 'building',
+			previewUrl: '',
+			sha,
+			issueNumber,
+			runId,
+		});
+	}
 
 	const project = await getPagesProject();
 
@@ -105,13 +107,15 @@ async function main() {
 		alias = deployment.aliases[0]!; // we can assert that idx 0 exists
 	}
 
-	await createPRComment({
-		status: 'success',
-		previewUrl: `[Visit Preview](${alias})`,
-		sha,
-		issueNumber,
-		runId,
-	});
+	if (issueNumber !== undefined) {
+		await createPRComment({
+			status: 'success',
+			previewUrl: `[Visit Preview](${alias})`,
+			sha,
+			issueNumber,
+			runId,
+		});
+	}
 
 	setOutput('id', deployment.id);
 	setOutput('url', deployment.url);
@@ -128,12 +132,15 @@ async function main() {
 		// @ts-expect-error always print the message
 		setFailed(error.message);
 
-		await createPRComment({
-			status: 'fail',
-			previewUrl: '',
-			sha: pr?.head.sha ?? context.sha,
-			issueNumber: pr?.number ?? context.issue.number,
-			runId: context.payload.workflow_run.id ?? context.runId,
-		});
+		const issueNumber = pr?.number ?? (context.issue.number as number | undefined);
+		if (issueNumber !== undefined) {
+			await createPRComment({
+				status: 'fail',
+				previewUrl: '',
+				sha: pr?.head.sha ?? context.sha,
+				issueNumber: pr?.number ?? context.issue.number,
+				runId: context.payload.workflow_run.id ?? context.runId,
+			});
+		}
 	}
 })();

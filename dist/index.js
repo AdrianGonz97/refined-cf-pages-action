@@ -24322,13 +24322,15 @@ async function main() {
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");
   }
-  await createPRComment({
-    status: "building",
-    previewUrl: "",
-    sha,
-    issueNumber,
-    runId
-  });
+  if (issueNumber !== void 0) {
+    await createPRComment({
+      status: "building",
+      previewUrl: "",
+      sha,
+      issueNumber,
+      runId
+    });
+  }
   const project = await getPagesProject();
   const productionEnvironment = branch === project.production_branch && !isPR && !isWorkflowRun;
   let githubDeployment;
@@ -24360,13 +24362,15 @@ async function main() {
   if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
     alias = deployment.aliases[0];
   }
-  await createPRComment({
-    status: "success",
-    previewUrl: `[Visit Preview](${alias})`,
-    sha,
-    issueNumber,
-    runId
-  });
+  if (issueNumber !== void 0) {
+    await createPRComment({
+      status: "success",
+      previewUrl: `[Visit Preview](${alias})`,
+      sha,
+      issueNumber,
+      runId
+    });
+  }
   (0, import_core3.setOutput)("id", deployment.id);
   (0, import_core3.setOutput)("url", deployment.url);
   (0, import_core3.setOutput)("environment", deployment.environment);
@@ -24378,13 +24382,16 @@ async function main() {
     await main();
   } catch (error) {
     (0, import_core3.setFailed)(error.message);
-    await createPRComment({
-      status: "fail",
-      previewUrl: "",
-      sha: pr?.head.sha ?? import_github5.context.sha,
-      issueNumber: pr?.number ?? import_github5.context.issue.number,
-      runId: import_github5.context.payload.workflow_run.id ?? import_github5.context.runId
-    });
+    const issueNumber = pr?.number ?? import_github5.context.issue.number;
+    if (issueNumber !== void 0) {
+      await createPRComment({
+        status: "fail",
+        previewUrl: "",
+        sha: pr?.head.sha ?? import_github5.context.sha,
+        issueNumber: pr?.number ?? import_github5.context.issue.number,
+        runId: import_github5.context.payload.workflow_run.id ?? import_github5.context.runId
+      });
+    }
   }
 })();
 /*! Bundled license information:
