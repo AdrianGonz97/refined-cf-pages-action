@@ -24332,7 +24332,7 @@ async function main() {
     });
   }
   const project = await getPagesProject();
-  const productionEnvironment = branch === project.production_branch && !isPR && !isWorkflowRun;
+  const productionEnvironment = branch === project.production_branch && !isPR && branchOwner === import_github5.context.repo.owner;
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({

@@ -69,7 +69,8 @@ async function main() {
 
 	const project = await getPagesProject();
 
-	const productionEnvironment = branch === project.production_branch && !isPR && !isWorkflowRun;
+	const productionEnvironment =
+		branch === project.production_branch && !isPR && branchOwner === context.repo.owner;
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
