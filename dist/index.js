@@ -24309,7 +24309,8 @@ async function main() {
   const workflowRun = isWorkflowRun ? import_github5.context.payload.workflow_run : void 0;
   const branch = config.branch || pr?.head.ref || workflowRun?.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   const branchOwner = workflowRun?.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
-  const pullRequests = isWorkflowRun ? (await config.octokit.rest.pulls.list({
+  const isOwnerBranch = branchOwner === import_github5.context.repo.owner;
+  const pullRequests = isWorkflowRun && !isOwnerBranch ? (await config.octokit.rest.pulls.list({
     owner: import_github5.context.repo.owner,
     repo: import_github5.context.repo.repo,
     head: `${branchOwner}:${branch}`
@@ -24332,7 +24333,7 @@ async function main() {
     });
   }
   const project = await getPagesProject();
-  const productionEnvironment = branch === project.production_branch && !isPR && branchOwner === import_github5.context.repo.owner;
+  const productionEnvironment = branch === project.production_branch && !isPR && isOwnerBranch;
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({

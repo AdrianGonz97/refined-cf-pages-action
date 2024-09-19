@@ -32,15 +32,18 @@ async function main() {
 	const branchOwner: string =
 		workflowRun?.head_repository.owner.login ?? context.payload.pull_request?.head.repo.owner.login;
 
-	const pullRequests = isWorkflowRun
-		? (
-				await config.octokit.rest.pulls.list({
-					owner: context.repo.owner,
-					repo: context.repo.repo,
-					head: `${branchOwner}:${branch}`,
-				})
-			).data
-		: [];
+	const isOwnerBranch = branchOwner === context.repo.owner;
+
+	const pullRequests =
+		isWorkflowRun && !isOwnerBranch
+			? (
+					await config.octokit.rest.pulls.list({
+						owner: context.repo.owner,
+						repo: context.repo.repo,
+						head: `${branchOwner}:${branch}`,
+					})
+				).data
+			: [];
 
 	pr =
 		workflowRun?.pull_requests?.[0] ??
@@ -69,8 +72,7 @@ async function main() {
 
 	const project = await getPagesProject();
 
-	const productionEnvironment =
-		branch === project.production_branch && !isPR && branchOwner === context.repo.owner;
+	const productionEnvironment = branch === project.production_branch && !isPR && isOwnerBranch;
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
