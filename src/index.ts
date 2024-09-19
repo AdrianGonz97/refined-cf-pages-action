@@ -34,16 +34,15 @@ async function main() {
 
 	const isOwnerBranch = branchOwner === context.repo.owner;
 
-	const pullRequests =
-		isWorkflowRun && !isOwnerBranch
-			? (
-					await config.octokit.rest.pulls.list({
-						owner: context.repo.owner,
-						repo: context.repo.repo,
-						head: `${branchOwner}:${branch}`,
-					})
-				).data
-			: [];
+	const pullRequests = isWorkflowRun
+		? (
+				await config.octokit.rest.pulls.list({
+					owner: context.repo.owner,
+					repo: context.repo.repo,
+					head: `${branchOwner}:${branch}`,
+				})
+			).data
+		: [];
 
 	pr =
 		workflowRun?.pull_requests?.[0] ??
@@ -54,13 +53,16 @@ async function main() {
 	const runId = workflowRun?.id ?? context.runId;
 	const sha = workflowRun?.head_sha ?? pr?.head.sha ?? context.sha;
 
+	const project = await getPagesProject();
+	const productionEnvironment = branch === project.production_branch && !isPR && isOwnerBranch;
+
 	config.octokit.log.debug('Detected settings', { issueNumber, runId, sha, branch, branchOwner });
 
 	if (branch === undefined) {
 		throw new Error('Unable to determine branch name');
 	}
 
-	if (issueNumber !== undefined) {
+	if (issueNumber !== undefined && !productionEnvironment) {
 		await createPRComment({
 			status: 'building',
 			previewUrl: '',
@@ -69,10 +71,6 @@ async function main() {
 			runId,
 		});
 	}
-
-	const project = await getPagesProject();
-
-	const productionEnvironment = branch === project.production_branch && !isPR && isOwnerBranch;
 
 	let githubDeployment: Awaited<ReturnType<typeof createGithubDeployment>>;
 	if (config.deploymentName.length > 0) {
@@ -110,7 +108,7 @@ async function main() {
 		alias = deployment.aliases[0]!; // we can assert that idx 0 exists
 	}
 
-	if (issueNumber !== undefined) {
+	if (issueNumber !== undefined && !productionEnvironment) {
 		await createPRComment({
 			status: 'success',
 			previewUrl: `[Visit Preview](${alias})`,

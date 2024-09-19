@@ -24310,7 +24310,7 @@ async function main() {
   const branch = config.branch || pr?.head.ref || workflowRun?.head_branch || process.env.GITHUB_HEAD_REF || process.env.GITHUB_REF_NAME;
   const branchOwner = workflowRun?.head_repository.owner.login ?? import_github5.context.payload.pull_request?.head.repo.owner.login;
   const isOwnerBranch = branchOwner === import_github5.context.repo.owner;
-  const pullRequests = isWorkflowRun && !isOwnerBranch ? (await config.octokit.rest.pulls.list({
+  const pullRequests = isWorkflowRun ? (await config.octokit.rest.pulls.list({
     owner: import_github5.context.repo.owner,
     repo: import_github5.context.repo.repo,
     head: `${branchOwner}:${branch}`
@@ -24319,11 +24319,13 @@ async function main() {
   const issueNumber = pr?.number ?? import_github5.context.issue.number;
   const runId = workflowRun?.id ?? import_github5.context.runId;
   const sha = workflowRun?.head_sha ?? pr?.head.sha ?? import_github5.context.sha;
+  const project = await getPagesProject();
+  const productionEnvironment = branch === project.production_branch && !isPR && isOwnerBranch;
   config.octokit.log.debug("Detected settings", { issueNumber, runId, sha, branch, branchOwner });
   if (branch === void 0) {
     throw new Error("Unable to determine branch name");
   }
-  if (issueNumber !== void 0) {
+  if (issueNumber !== void 0 && !productionEnvironment) {
     await createPRComment({
       status: "building",
       previewUrl: "",
@@ -24332,8 +24334,6 @@ async function main() {
       runId
     });
   }
-  const project = await getPagesProject();
-  const productionEnvironment = branch === project.production_branch && !isPR && isOwnerBranch;
   let githubDeployment;
   if (config.deploymentName.length > 0) {
     githubDeployment = await createGithubDeployment({
@@ -24363,7 +24363,7 @@ async function main() {
   if (!productionEnvironment && deployment.aliases && deployment.aliases.length > 0) {
     alias = deployment.aliases[0];
   }
-  if (issueNumber !== void 0) {
+  if (issueNumber !== void 0 && !productionEnvironment) {
     await createPRComment({
       status: "success",
       previewUrl: `[Visit Preview](${alias})`,
