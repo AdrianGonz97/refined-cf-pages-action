@@ -30,7 +30,10 @@ async function main() {
 		process.env.GITHUB_REF_NAME;
 
 	const branchOwner: string =
-		workflowRun?.head_repository.owner.login ?? context.payload.pull_request?.head.repo.owner.login;
+		workflowRun?.head_repository.owner.login ??
+		context.payload.pull_request?.head.repo.owner.login ??
+		// non-PR or workflow_run event
+		context.repo.owner;
 
 	const isOwnerBranch = branchOwner === context.repo.owner;
 
