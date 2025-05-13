@@ -33,6 +33,10 @@ inputs:
     description: "The version of Wrangler to use. An empty string ('') signifies no version specifier will be applied"
     required: false
     default: '3'
+  comment:
+    description: 'Specify if the action should comment on the pull request'
+    required: false
+    default: 'true'
 runs:
   using: 'node20'
   main: 'dist/index.js'

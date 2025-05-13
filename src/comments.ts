@@ -47,6 +47,7 @@ type CreatePRCommentOpts = {
 };
 export async function createPRComment(opts: CreatePRCommentOpts) {
 	if (!isPR && !isWorkflowRun) return;
+	if (!config.comment) return;
 
 	const messageId = `refined-cf-pages-action:deployment-summary:${context.repo.repo}`;
 	const deploymentLogUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${opts.runId}`;

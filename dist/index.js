@@ -23070,7 +23070,8 @@ function loadConfig() {
       branch: (0, import_core.getInput)("branch", { required: false }),
       deploymentName: (0, import_core.getInput)("deploymentName", { required: false }),
       workingDirectory: (0, import_core.getInput)("workingDirectory", { required: false }),
-      wranglerVersion: (0, import_core.getInput)("wranglerVersion", { required: false })
+      wranglerVersion: (0, import_core.getInput)("wranglerVersion", { required: false }),
+      comment: (0, import_core.getInput)("comment", { required: false }) === "true"
     };
   } catch (error) {
     (0, import_core.setFailed)(error.message);
@@ -23114,6 +23115,8 @@ var Status = {
 };
 async function createPRComment(opts) {
   if (!isPR && !isWorkflowRun)
+    return;
+  if (!config.comment)
     return;
   const messageId = `refined-cf-pages-action:deployment-summary:${import_github3.context.repo.repo}`;
   const deploymentLogUrl = `${import_github3.context.serverUrl}/${import_github3.context.repo.owner}/${import_github3.context.repo.repo}/actions/runs/${opts.runId}`;
